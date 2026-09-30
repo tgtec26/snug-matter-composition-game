@@ -90,3 +90,7 @@ export const isOrderOpen = (o: Order, doneOrders: string[]) => (o.unlockedAfter 
 /** 원자 조립기 별점: 3개에서 넣었다 뺀 횟수 2회 이상·시간 초과·실패 경험마다 1개씩 감점 (최소 1) */
 export const atomStars = (wobble: number, overTime: boolean, fails: number) =>
   Math.max(1, 3 - (wobble > 1 ? 1 : 0) - (overTime ? 1 : 0) - (fails > 0 ? 1 : 0));
+
+/** 주기율표 광장 별점: 오배치 1~2회 -1, 3회 이상 -2, 시간 초과 -1 (최소 1) */
+export const tableStars = (misses: number, overTime: boolean) =>
+  Math.max(1, 3 - (misses > 2 ? 2 : misses > 0 ? 1 : 0) - (overTime ? 1 : 0));
