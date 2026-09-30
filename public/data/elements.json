@@ -1,0 +1,185 @@
+[
+  {
+    "number": 1,
+    "symbol": "H",
+    "name": "수소",
+    "group": 1,
+    "period": 1,
+    "state": "기체",
+    "neutrons": 0,
+    "page": 147
+  },
+  {
+    "number": 2,
+    "symbol": "He",
+    "name": "헬륨",
+    "group": 18,
+    "period": 1,
+    "state": "기체",
+    "page": 147
+  },
+  {
+    "number": 3,
+    "symbol": "Li",
+    "name": "리튬",
+    "group": 1,
+    "period": 2,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 4,
+    "symbol": "Be",
+    "name": "베릴륨",
+    "group": 2,
+    "period": 2,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 5,
+    "symbol": "B",
+    "name": "붕소",
+    "group": 13,
+    "period": 2,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 6,
+    "symbol": "C",
+    "name": "탄소",
+    "group": 14,
+    "period": 2,
+    "state": "고체",
+    "neutrons": 6,
+    "page": 147
+  },
+  {
+    "number": 7,
+    "symbol": "N",
+    "name": "질소",
+    "group": 15,
+    "period": 2,
+    "state": "기체",
+    "page": 147
+  },
+  {
+    "number": 8,
+    "symbol": "O",
+    "name": "산소",
+    "group": 16,
+    "period": 2,
+    "state": "기체",
+    "neutrons": 8,
+    "page": 147
+  },
+  {
+    "number": 9,
+    "symbol": "F",
+    "name": "플루오린",
+    "group": 17,
+    "period": 2,
+    "state": "기체",
+    "page": 147
+  },
+  {
+    "number": 10,
+    "symbol": "Ne",
+    "name": "네온",
+    "group": 18,
+    "period": 2,
+    "state": "기체",
+    "page": 147
+  },
+  {
+    "number": 11,
+    "symbol": "Na",
+    "name": "나트륨(소듐)",
+    "group": 1,
+    "period": 3,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 12,
+    "symbol": "Mg",
+    "name": "마그네슘",
+    "group": 2,
+    "period": 3,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 13,
+    "symbol": "Al",
+    "name": "알루미늄",
+    "group": 13,
+    "period": 3,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 14,
+    "symbol": "Si",
+    "name": "규소",
+    "group": 14,
+    "period": 3,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 15,
+    "symbol": "P",
+    "name": "인",
+    "group": 15,
+    "period": 3,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 16,
+    "symbol": "S",
+    "name": "황",
+    "group": 16,
+    "period": 3,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 17,
+    "symbol": "Cl",
+    "name": "염소",
+    "group": 17,
+    "period": 3,
+    "state": "기체",
+    "page": 147
+  },
+  {
+    "number": 18,
+    "symbol": "Ar",
+    "name": "아르곤",
+    "group": 18,
+    "period": 3,
+    "state": "기체",
+    "page": 147
+  },
+  {
+    "number": 19,
+    "symbol": "K",
+    "name": "칼륨(포타슘)",
+    "group": 1,
+    "period": 4,
+    "state": "고체",
+    "page": 147
+  },
+  {
+    "number": 20,
+    "symbol": "Ca",
+    "name": "칼슘",
+    "group": 2,
+    "period": 4,
+    "state": "고체",
+    "page": 147
+  }
+]

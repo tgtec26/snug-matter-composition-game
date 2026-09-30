@@ -1,0 +1,58 @@
+[
+  {
+    "id": "H+",
+    "symbol": "H",
+    "charge": 1,
+    "formula": "H⁺",
+    "name": "수소 이온",
+    "pole": "(-)극"
+  },
+  {
+    "id": "Li+",
+    "symbol": "Li",
+    "charge": 1,
+    "formula": "Li⁺",
+    "name": "리튬 이온",
+    "pole": "(-)극"
+  },
+  {
+    "id": "Na+",
+    "symbol": "Na",
+    "charge": 1,
+    "formula": "Na⁺",
+    "name": "나트륨 이온",
+    "pole": "(-)극"
+  },
+  {
+    "id": "K+",
+    "symbol": "K",
+    "charge": 1,
+    "formula": "K⁺",
+    "name": "칼륨 이온",
+    "pole": "(-)극"
+  },
+  {
+    "id": "Mg2+",
+    "symbol": "Mg",
+    "charge": 2,
+    "formula": "Mg²⁺",
+    "name": "마그네슘 이온",
+    "pole": "(-)극"
+  },
+  {
+    "id": "Cl-",
+    "symbol": "Cl",
+    "charge": -1,
+    "formula": "Cl⁻",
+    "name": "염화 이온",
+    "pole": "(+)극"
+  },
+  {
+    "id": "O2-",
+    "symbol": "O",
+    "charge": -2,
+    "formula": "O²⁻",
+    "name": "산화 이온",
+    "pole": "(+)극"
+  }
+]
