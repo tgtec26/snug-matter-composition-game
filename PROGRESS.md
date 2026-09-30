@@ -14,3 +14,10 @@
 1. 계획서 `docs/superpowers/plans/2026-09-30-matter-composition-mvp.md` 작성 (스펙 9장 코드 구성 기준, 태스크별 체크박스).
 2. 암석 순환에서 공통 부품 이식 (AGENTS.md "참고 구현" 목록) → `rules.ts`(4-3 판정표)와 테스트부터. 물질 분리 공방의 주문판·견습생 그림이 먼저 생기면 가져온다.
 3. Vercel 대시보드에서 Import → main 푸시 자동 배포.
+
+## 2026-09-30 구현 계획서
+- `docs/superpowers/plans/2026-09-30-matter-composition-mvp.md` 작성 (태스크 13개). Task 1~4(타입·데이터·rules·store, 코드 전문·TDD) → 5~6(엔진 이식, 주문판·결과·퀴즈 흐름) → 7~10(방 4개) → 11(엔딩·요약·보너스) → 12(admin) → 13(완주 QA·푸시).
+- 열린 항목: 원소 상태·쪽수는 교과서 그림 Ⅳ-6 대조, 튜토리얼 퀴즈 생략 해석.
+
+### 다음 단계
+1. Task 1부터 subagent-driven-development로 실행.
