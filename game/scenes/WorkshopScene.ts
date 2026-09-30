@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { addBg, hiDpi, TEXT } from '@/game/systems/render';
+import { addBg, addImgH, hiDpi, TEXT } from '@/game/systems/render';
 import { attachRouter } from '@/game/systems/sceneRouter';
 import { useGameStore } from '@/game/store';
 
@@ -21,9 +21,11 @@ export class WorkshopScene extends Phaser.Scene {
     this.events.once('shutdown', unsub);
     // 작업대와 인물 (플레이스홀더: 색 원 + 이름)
     this.add.rectangle(640, 760, 1280, 80, 0x4a3b2a);
-    this.add.circle(150, 690, 44, 0x60a5fa).setStrokeStyle(4, 0xffffff);
+    if (this.textures.exists('npc_apprentice')) addImgH(this, 150, 640, 'npc_apprentice', 180);
+    else this.add.circle(150, 690, 44, 0x60a5fa).setStrokeStyle(4, 0xffffff);
     this.add.text(150, 750, '견습생', { ...TEXT, fontSize: '18px', color: '#fff' }).setOrigin(0.5);
-    this.add.circle(1130, 690, 44, 0xe9c46a).setStrokeStyle(4, 0xffffff);
+    if (this.textures.exists('npc_doctor')) addImgH(this, 1130, 640, 'npc_doctor', 180);
+    else this.add.circle(1130, 690, 44, 0xe9c46a).setStrokeStyle(4, 0xffffff);
     this.add.text(1130, 750, '입자 박사', { ...TEXT, fontSize: '18px', color: '#fff' }).setOrigin(0.5);
     attachRouter(this);
   }

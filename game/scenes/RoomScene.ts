@@ -1,15 +1,24 @@
 import * as Phaser from 'phaser';
 import { addBg, hiDpi } from '@/game/systems/render';
 import { attachRouter } from '@/game/systems/sceneRouter';
+import { useGameStore, type GameState } from '@/game/store';
 
 const NEON: Record<string, number> = { He: 0xfde68a, Ne: 0xfb7185, Ar: 0xc084fc };
+/** 지금 방의 배경 키 (갈림길은 방금 끝낸 분자 방) — room_atom_bg · room_table_bg · room_molecule_bg · room_ion_bg */
+const bgKey = (s: GameState) => `room_${s.queue[s.phase === 'classify' ? s.stepIdx - 1 : s.stepIdx]?.room}_bg`;
 
 /** 방 4개(원자 조립기·주기율표·분자 조립소·이온 공방)의 바탕. 주기율표 광장의 1족·18족 연출은 window 'room-fx' 이벤트로 받는다. */
 export class RoomScene extends Phaser.Scene {
   constructor() { super({ key: 'Room' }); }
   create() {
     hiDpi(this);
-    addBg(this, 'room_bg', 0x1c3a3a);
+    let key = bgKey(useGameStore.getState());
+    let bg = addBg(this, key, 0x1c3a3a).setDepth(-1);
+    const unsub = useGameStore.subscribe(s => {   // 방이 바뀌어도 씬은 그대로라 배경만 갈아 끼운다
+      if (bgKey(s) === key) return;
+      key = bgKey(s); bg.destroy(); bg = addBg(this, key, 0x1c3a3a).setDepth(-1);
+    });
+    this.events.once('shutdown', unsub);
     attachRouter(this);
     const onFx = (e: Event) => {
       const { symbol, group, kind } = (e as CustomEvent<{ symbol?: string; group?: number; kind?: string }>).detail;

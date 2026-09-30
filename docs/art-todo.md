@@ -8,7 +8,7 @@
 - **원본 보관**: `docs/assets-source/<분류>/<이름>.png` (커밋), 게임용: `public/assets/<분류>/<이름>.webp`.
 - **화풍 통일**: 모든 프롬프트 앞에 아래 "화풍 머리말"을 붙이고, 첫 번째로 만든 공작소 배경을 이후 요청에 참고 그림으로 첨부한다.
 - **격자 시트**: 인물·입자·장치처럼 작은 그림은 한 장의 격자 시트(흰 배경 또는 투명, 칸 사이 여백 넉넉히)로 만들어 잘라 화풍을 맞춘다.
-- **Phaser 텍스처 키 ↔ 파일 경로**: `BootScene.preload()`에서 `this.load.image(key, '/assets/...webp')`로 불러온다. 파일이 없으면 로드 실패만 나고 `addBg`/`isArt`(game/systems/render.ts)가 플레이스홀더로 되돌아간다. **현재 BootScene에는 preload가 없다** — 그림을 넣는 태스크에서 아래 표의 키대로 `preload()`를 추가해야 자동 교체된다 (암석 순환 `game/scenes/BootScene.ts` 22~29행 방식).
+- **Phaser 텍스처 키 ↔ 파일 경로**: `BootScene.preload()`가 `public/assets/manifest.json`(파일 경로 배열, 예: `["bg/workshop.webp"]`)을 읽고, 거기 적힌 파일 중 `game/systems/render.ts`의 `ART` 표에 있는 것만 불러온다. **그림 파일을 넣으면 manifest에 경로를 한 줄 추가**해야 자동 교체된다. 적히지 않은 파일은 요청하지 않으므로 콘솔 404가 나지 않고, 텍스처가 없으면 `addBg`와 공작소 인물이 플레이스홀더로 남는다. 지금 연결된 키: 배경 5장(`workshop_bg`, `room_<atom|table|molecule|ion>_bg`), 인물 `npc_apprentice`·`npc_doctor`(WorkshopScene). 표정 2장·장치(fx_*)는 쓰는 코드가 아직 없어 `ART`에 넣고 씬에서 연결해야 한다.
 - React 오버레이(방 4개)의 입자·타일·카드는 CSS로 그린다. 그림으로 바꾸려면 해당 오버레이의 공 컴포넌트(`Ball`, `AtomBall`, `Electron`, `Tile`)에서 `<img>`로 바꾸는 코드 수정이 필요하다. 입자는 **CSS 우선**(스펙 10장 "SVG 코드 우선")이므로 교체는 선택 사항.
 
 ### 화풍 머리말 (모든 요청 앞에)
@@ -25,7 +25,7 @@
 | `public/assets/bg/room_molecule.webp` | `room_molecule_bg` | 분자 조립소 | 나무 작업대 윗면이 화면 왼쪽 2/3(760×430)를 차지하는 사선 시점 공방. 작업대 아래 가운데에 원자 공 상자(나무 상자, 뚜껑 열림), 오른쪽 여백에 건전지와 물컵이 놓일 자리. |
 | `public/assets/bg/room_ion.webp` | `room_ion_bg` | 이온 공방 | 보라·남색 톤 실험실. 가운데 원형 받침(지름 480px 영역 비움), 왼쪽 전자 상자 선반, 오른쪽 위 이온식 표시판(빈 검은 판). 격자 배열 장면에도 쓰이므로 가운데는 단순하게. |
 
-※ 지금 RoomScene은 방 4개가 텍스처 키 `room_bg` 하나를 공유한다. 방별 배경을 넣을 때 `RoomScene.create()`에서 현재 방(room) 종류로 키를 고르도록 한 줄 바꾼다.
+※ RoomScene은 현재 방 종류로 키(`room_<room>_bg`)를 고르고, 방이 바뀌면 배경만 갈아 끼운다 (갈림길은 방금 끝낸 분자 방 배경).
 
 ## 2. 인물 (격자 시트 1장: 3열×2행, 칸 512×512 → 표시 높이 180px, 360px WebP)
 
@@ -69,5 +69,6 @@ CSS로 이미 입체 공(그라데이션+그림자)이 있어 **선택 사항**.
 - [ ] 공작소 배경 먼저 생성 → 이후 요청에 참고 그림으로 첨부
 - [ ] 방 배경 4장 + RoomScene 방별 키 연결
 - [ ] 인물 시트 (물질 분리 공방 견습생이 있으면 재사용)
-- [ ] BootScene `preload()` 추가, 1280×800에서 글자·버튼과 겹치지 않는지 확인
+- [x] BootScene `preload()` 추가 (manifest 방식)
+- [ ] 그림을 넣은 뒤 manifest에 경로 추가, 1280×800에서 글자·버튼과 겹치지 않는지 확인
 - [ ] (선택) 입자·타일 시트, 장치 그림

@@ -28,3 +28,17 @@ export function addBg(scene: Phaser.Scene, key: string, color: number) {
 }
 /** 텍스처가 실제 그림 파일인지 (플레이스홀더는 캔버스로 생성됨) */
 export const isArt = (scene: Phaser.Scene, key: string) => scene.textures.get(key).getSourceImage() instanceof HTMLImageElement;
+
+/** 텍스처 키 ← public/assets/ 안의 파일 (docs/art-todo.md 표). */
+const ART: Record<string, string> = {
+  'bg/workshop.webp': 'workshop_bg',
+  'bg/room_atom.webp': 'room_atom_bg',
+  'bg/room_table.webp': 'room_table_bg',
+  'bg/room_molecule.webp': 'room_molecule_bg',
+  'bg/room_ion.webp': 'room_ion_bg',
+  'npc/apprentice.webp': 'npc_apprentice',
+  'npc/doctor.webp': 'npc_doctor',
+};
+/** public/assets/manifest.json 에 적힌(= 실제로 있는) 파일만 [키, URL]로 — 없는 파일을 요청해 404가 쌓이지 않게 */
+export const artToLoad = (files: string[]): [string, string][] =>
+  files.filter(f => ART[f]).map(f => [ART[f], `/assets/${f}`]);
