@@ -20,6 +20,11 @@ export function addImgH(scene: Phaser.Scene, x: number, y: number, key: string, 
   const img = scene.add.image(x, y, key);
   return img.setScale(h / img.height);
 }
+/** 너비만 지정, 세로는 원본 비율 (연출 장치 그림용) */
+export function addImgW(scene: Phaser.Scene, x: number, y: number, key: string, w: number) {
+  const img = scene.add.image(x, y, key);
+  return img.setScale(w / img.width);
+}
 /** 전체 화면 배경: 그림이 있으면 그림, 없으면 단색 */
 export function addBg(scene: Phaser.Scene, key: string, color: number) {
   return scene.textures.exists(key)
@@ -37,7 +42,14 @@ const ART: Record<string, string> = {
   'bg/room_molecule.webp': 'room_molecule_bg',
   'bg/room_ion.webp': 'room_ion_bg',
   'npc/apprentice.webp': 'npc_apprentice',
+  'npc/apprentice_happy.webp': 'npc_apprentice_happy',
+  'npc/apprentice_think.webp': 'npc_apprentice_think',
   'npc/doctor.webp': 'npc_doctor',
+  'fx/bucket.webp': 'fx_bucket',
+  'fx/balloon.webp': 'fx_balloon',
+  'fx/battery.webp': 'fx_battery',
+  'fx/cup.webp': 'fx_cup',
+  'fx/metal.webp': 'fx_metal',
 };
 /** public/assets/manifest.json 에 적힌(= 실제로 있는) 파일만 [키, URL]로 — 없는 파일을 요청해 404가 쌓이지 않게 */
 export const artToLoad = (files: string[]): [string, string][] =>

@@ -8,6 +8,7 @@ AI 생성 캐릭터·아이템 시트(격자) → 칸별 투명 WebP.
 - 배경이 투명하지 않으면(모서리가 불투명) 가장자리에서 이어진 배경색을 투명으로 바꾼다.
 - 결과는 정사각형 캔버스(여백 6%) 가운데·아래 정렬, 한 변 = 지정 px, WebP quality 90.
 - 이름이 '-' 인 칸은 건너뛴다.
+- 환경변수 TIGHT=1 이면 정사각 캔버스 대신 그림 경계 그대로(긴 변 = 지정 px, 가로세로 비 유지).
 - 환경변수 WHOLE=1 이면 칸 안의 불투명 영역 전체를 자른다 (반짝이처럼 조각이 흩어진 효과 그림용).
 """
 import sys
@@ -94,6 +95,11 @@ def main(src, cols, rows, out_dir, size, names):
             continue
         # 덩어리 상자에서 약간 넓혀 잘라 가장자리 안티앨리어싱 보존 (다른 덩어리는 투명 처리)
         fig = cell.crop(box)
+        if os.environ.get('TIGHT'):   # 정사각 캔버스 없이 그림 경계 그대로, 긴 변 = size (UI 바탕·문·카드처럼 가로세로 비가 다른 그림용)
+            k = size / max(fig.size)
+            fig.resize((max(1, round(fig.width * k)), max(1, round(fig.height * k))), Image.LANCZOS).save(os.path.join(out_dir, f'{name}.webp'), 'WEBP', quality=90, method=6)
+            print(f'{name}: {fig.size} -> long side {size}px')
+            continue
         side = round(max(fig.size) * 1.12)
         canvas = Image.new('RGBA', (side, side), (0, 0, 0, 0))
         canvas.paste(fig, ((side - fig.width) // 2, side - fig.height - round(side * 0.04)), fig)
