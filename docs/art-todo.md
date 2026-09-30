@@ -79,3 +79,6 @@ CSS로 이미 입체 공(그라데이션+그림자)이 있어 **선택 사항**.
 
 ## 견습생 선택 (2026-10-01)
 시작 화면에서 견습생 3명 중 고른다(`game/characters.ts`). 3명 모두 codex로 **처음부터 투명 배경**(`gen_image.sh`에서 "REAL TRANSPARENT background" 요청)으로 새로 그려 교체했다. 원본 시트: `docs/assets-source/npc/{girl1,boy,girl2}_transparent.png` → `slice_sheet.py <시트> 3 1 public/assets/npc 360 <이름 3개>`. 흰 배경으로 받아 지우면 경계가 깎이고 내부 흰 얼룩이 남으므로 앞으로 인물·아이템도 투명 배경으로 요청한다.
+
+## 전체 에셋 투명 배경 재생성 (2026-10-01)
+흰 배경 제거로 경계가 깨지던 `items/`·`fx/`·`ui/`·`npc/doctor`를 모두 codex의 **투명 배경 출력**으로 다시 만들었다(기존 시트를 참고 그림으로 첨부해 배치·화풍 유지). 새 원본은 `docs/assets-source/<분류>/*_t.png`. 잘라내기: `items/particles_t` 4×3(`proton neutron electron atom_H atom_C atom_N atom_O atom_Cl tile_na tile_cl slot_socket slot_socket_lit`), `fx/sheet_t` 3×2(`bucket balloon battery cup metal -`, TIGHT=1), `ui/cards_t` 3×2, `ui/doors_t` 2×2, `ui/tiles_t` 4×2, `ui/ui_small_t` 3×2, `ui/ui_wide_t` 2×3, `ui/stamp_t` 1×1. 원자핵(`fx/nucleus`)은 직전에 따로 교체해 그대로 둠. 바닥 그림자는 그림 안 반투명이라 `fix_shadow.py`는 더 이상 필요 없다.
