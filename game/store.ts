@@ -10,7 +10,7 @@ export interface GameState {
   orderId: string | null; queue: Step[]; stepIdx: number;
   doneOrders: string[]; stars: number; mistakes: number;
   newCards: string[]; startedAt: number | null; elapsedMs: number;
-  tutorialDone: boolean;
+  tutorialDone: boolean; classifyMissed: boolean;
 }
 export interface RoomResult { room: Step['room']; target: string; stars: number; extra?: string[] }
 interface Actions {
@@ -25,7 +25,7 @@ interface Actions {
 }
 const fresh = (): GameState => ({
   nickname: '', phase: 'title', orderId: null, queue: [], stepIdx: 0, doneOrders: [], stars: 0, mistakes: 0,
-  newCards: [], startedAt: null, elapsedMs: 0, tutorialDone: false,
+  newCards: [], startedAt: null, elapsedMs: 0, tutorialDone: false, classifyMissed: false,
 });
 const KIND = { atom: 'elements', table: 'placed', molecule: 'molecules', ion: 'ions' } as const;
 const order = (id: string | null) => useDataStore.getState().orders.find(o => o.id === id);
@@ -47,7 +47,7 @@ export const useGameStore = create<GameState & Actions>()(persist((set, get) => 
   }),
   acceptOrder: (id) => set(s => {
     const o = order(id);
-    if (!o || !['orders', 'accept'].includes(s.phase) || !isOrderOpen(o, s.doneOrders)) return {};
+    if (!o || !['orders', 'accept'].includes(s.phase) || !isOrderOpen(o, s.doneOrders) || s.doneOrders.includes(id)) return {};
     if (s.phase === 'accept' && id !== s.orderId) return {};   // 튜토리얼 화면에서는 제시된 주문만
     const queue = pendingSteps(o, loadDex());
     return { orderId: id, queue, stepIdx: 0, phase: afterRoom(queue, 0) };
@@ -59,13 +59,15 @@ export const useGameStore = create<GameState & Actions>()(persist((set, get) => 
     for (const x of r.extra ?? []) addToDex('molecules', x);   // 보너스: 다른 물질 카드
     const stepIdx = s.stepIdx + 1;
     const newCards = isNew ? [...s.newCards, r.target] : s.newCards;
-    const base = { stepIdx, stars: s.stars + r.stars, newCards };
+    const base = { stepIdx, stars: s.stars + r.stars, newCards, classifyMissed: false };
     return r.room === 'molecule' ? { ...base, phase: 'classify' as Phase } : { ...base, phase: afterRoom(s.queue, stepIdx) };
   }),
   classify: (answer) => set(s => {
     const cur = s.queue[s.stepIdx - 1];
-    if (s.phase !== 'classify' || !cur) return {};
-    if (classifyAtoms(moleculeAtoms(cur.target)) !== answer) return { mistakes: s.mistakes + 1, stars: Math.max(0, s.stars - 1) };
+    const atoms = cur ? moleculeAtoms(cur.target) : [];
+    if (s.phase !== 'classify' || !useDataStore.getState().loaded || !atoms.length) return {};   // 새로고침 직후 데이터 미로드 시 오판 방지
+    if (classifyAtoms(atoms) !== answer)   // 별 감점은 단계당 첫 오답만
+      return { mistakes: s.mistakes + 1, classifyMissed: true, stars: s.classifyMissed ? s.stars : Math.max(0, s.stars - 1) };
     return { phase: afterRoom(s.queue, s.stepIdx) };
   }),
   finishQuiz: (firstTry) => set(s => {

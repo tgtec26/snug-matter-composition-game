@@ -107,3 +107,41 @@ it('새로고침 복원: 저장된 진행이 rehydrate로 돌아온다', async (
   await useGameStore.persist.rehydrate();
   expect(S().phase).toBe('room'); expect(S().stepIdx).toBe(1); expect(S().orderId).toBe('o0');
 });
+
+it('완료한 주문은 재수락 불가 (별 파밍 방지)', () => {
+  finishTutorial();
+  playOrder('o1');
+  const stars = S().stars;
+  S().acceptOrder('o1');
+  expect(S().phase).toBe('orders');
+  expect(S().stars).toBe(stars);
+});
+it('classify 오답 3번이어도 별은 1개만 감점, mistakes는 매번 +1', () => {
+  S().start('a'); force('orders'); S().acceptOrder('o1');
+  S().completeRoom({ room: 'molecule', target: 'H2O', stars: 3 });
+  S().classify('원소'); S().classify('원소'); S().classify('원소');
+  expect(S().stars).toBe(2); expect(S().mistakes).toBe(3);
+  S().classify('화합물');
+  expect(S().phase).toBe('result');
+});
+it('다음 분자 방의 classify는 감점 플래그가 리셋된다', () => {
+  S().start('a'); force('orders'); S().acceptOrder('o2');
+  S().completeRoom({ room: 'atom', target: 'N', stars: 0 });
+  S().completeRoom({ room: 'table', target: 'N', stars: 0 });
+  S().completeRoom({ room: 'molecule', target: 'N2', stars: 3 });
+  S().classify('화합물'); S().classify('화합물');   // N2는 원소 → 오답
+  expect(S().stars).toBe(2);
+  S().classify('원소');
+  S().completeRoom({ room: 'molecule', target: 'O2', stars: 3 });
+  S().classify('화합물');
+  expect(S().stars).toBe(4);   // 2 + 3 - 1
+});
+it('데이터가 로드되기 전(새로고침 직후) classify는 무시', () => {
+  S().start('a'); force('orders'); S().acceptOrder('o2');
+  S().completeRoom({ room: 'atom', target: 'N', stars: 0 });
+  S().completeRoom({ room: 'table', target: 'N', stars: 0 });
+  S().completeRoom({ room: 'molecule', target: 'N2', stars: 3 });
+  useDataStore.setState({ loaded: false, molecules: [] } as never);
+  S().classify('화합물');
+  expect(S().mistakes).toBe(0); expect(S().stars).toBe(3); expect(S().phase).toBe('classify');
+});
