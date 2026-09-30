@@ -9,17 +9,18 @@ import { playSfx } from '@/game/audio';
 import { useLock } from '@/components/hooks/useLock';
 import { useDrag } from '@/components/hooks/useDrag';
 import { Burst } from '@/components/overlays/Burst';
+import { Art, Sphere, artBg, artFrame } from '@/components/Art';
 import type { Step } from '@/game/types';
 
 const D = 56;
 const BX0 = 140, BX1 = 900, BY0 = 150, BY1 = 580;
 const BOX_Y = 690, BOX_X = 380;
-const COLORS: Record<string, { bg: string; fg: string }> = {
-  H: { bg: 'radial-gradient(circle at 35% 30%, #ffffff, #e2e8f0 55%, #94a3b8)', fg: '#0f172a' },
-  C: { bg: 'radial-gradient(circle at 35% 30%, #9ca3af, #374151 55%, #111827)', fg: '#fff' },
-  N: { bg: 'radial-gradient(circle at 35% 30%, #bfdbfe, #3b82f6 55%, #1e3a8a)', fg: '#fff' },
-  O: { bg: 'radial-gradient(circle at 35% 30%, #fecaca, #ef4444 55%, #991b1b)', fg: '#fff' },
-  Cl: { bg: 'radial-gradient(circle at 35% 30%, #bbf7d0, #22c55e 55%, #14532d)', fg: '#fff' },
+const COLORS: Record<string, { src: string; fg: string }> = {
+  H: { src: 'items/atom_H', fg: '#0f172a' },
+  C: { src: 'items/atom_C', fg: '#fff' },
+  N: { src: 'items/atom_N', fg: '#fff' },
+  O: { src: 'items/atom_O', fg: '#fff' },
+  Cl: { src: 'items/atom_Cl', fg: '#fff' },
 };
 const inBench = (x: number, y: number) => x >= BX0 && x <= BX1 && y >= BY0 && y <= BY1;
 const inside = (x: number, y: number) => x >= BX0 + D / 2 && x <= BX1 - D / 2 && y >= BY0 + D / 2 && y <= BY1 - D / 2;
@@ -52,10 +53,10 @@ function repack(list: A[]): A[] {
 
 export const AtomBall = ({ sym, size = D, lift = false, glow = false }: { sym: string; size?: number; lift?: boolean; glow?: boolean }) => (
   <div className="relative" style={{ width: size, height: size, transform: lift ? 'scale(1.15)' : undefined }}>
-    <div className="absolute rounded-full bg-black/40 blur-[3px]"
-      style={{ left: size * 0.1, right: size * 0.1, bottom: lift ? -size * 0.45 : -size * 0.08, height: size * 0.28 }} />
-    <div className="absolute inset-0 rounded-full border border-white/50 flex items-center justify-center font-bold"
-      style={{ background: COLORS[sym]?.bg, color: COLORS[sym]?.fg, fontSize: size * 0.42, boxShadow: glow ? '0 0 22px 8px #fcd34d' : undefined }}>{sym}</div>
+    {COLORS[sym] && <Sphere src={COLORS[sym].src} size={size} lift={lift} />}
+    <div className="absolute inset-0 rounded-full flex items-center justify-center font-bold"
+      style={{ color: COLORS[sym]?.fg, fontSize: size * 0.42, boxShadow: glow ? '0 0 22px 8px #fcd34d' : undefined,
+        textShadow: COLORS[sym]?.fg === '#fff' ? '0 1px 3px #000a' : '0 1px 2px #fff' }}>{sym}</div>
   </div>
 );
 
@@ -195,7 +196,7 @@ export function MoleculeBenchOverlay({ step }: { step: Step }) {
   return (
     <div ref={stage} className="absolute inset-0 select-none">
       {/* 위: 만들 물질 + 화학식 칸 */}
-      <div className="absolute flex items-center justify-between rounded-2xl bg-black/55 px-6" style={{ left: BX0, top: 52, width: BX1 - BX0, height: 72 }}>
+      <div className="absolute flex items-center justify-between px-8" style={{ left: BX0, top: 52, width: BX1 - BX0, height: 72, ...artFrame('ui/plate_wood', 60, 20) }}>
         <span className="text-amber-200 text-[22px] font-bold whitespace-nowrap">만들 것 · {target?.name}</span>
         <span key={live + (done ? 'd' : '')} className="font-bold" style={{ fontSize: 48, color: done ? '#fcd34d' : '#fff', animation: 'pop .35s', textShadow: done ? '0 0 20px #fcd34d' : undefined }}>
           {live || '□'}{done && <span className="text-[24px] ml-3">{done.name}</span>}
@@ -205,9 +206,8 @@ export function MoleculeBenchOverlay({ step }: { step: Step }) {
         <div className={`h-full rounded-full ${left < 0.2 ? 'bg-red-400' : 'bg-emerald-400'}`} style={{ width: `${left * 100}%`, transition: 'width .2s linear' }} />
       </div>
 
-      {/* 작업대: 윗면 + 앞 모서리 */}
-      <div className="absolute rounded-2xl" style={{ left: BX0, top: BY0, width: BX1 - BX0, height: BY1 - BY0, background: 'linear-gradient(#d6b98c, #b89563)', boxShadow: 'inset 0 6px 24px #0004', outline: removing ? '5px solid #f87171' : drag && inBench(drag.x, drag.y) ? '5px solid #fcd34d' : 'none' }} />
-      <div className="absolute rounded-b-2xl" style={{ left: BX0 - 8, top: BY1 - 6, width: BX1 - BX0 + 16, height: 26, background: 'linear-gradient(#7c5a2b, #4a3418)', boxShadow: '0 12px 18px #0006' }} />
+      {/* 작업대는 배경 그림(room_molecule)에 있다. 여기서는 끌고 있을 때 놓을 영역 테두리만 */}
+      <div className="absolute rounded-2xl pointer-events-none" style={{ left: BX0, top: BY0, width: BX1 - BX0, height: BY1 - BY0, outline: removing ? '5px solid #f87171' : drag && inBench(drag.x, drag.y) ? '5px solid #fcd34d' : 'none' }} />
 
       {/* 원자 (아래쪽이 앞: 깊이 정렬) */}
       <div key={shake} className="absolute inset-0" style={{ animation: shake ? 'shake .3s' : undefined, pointerEvents: 'none' }}>
@@ -232,30 +232,26 @@ export function MoleculeBenchOverlay({ step }: { step: Step }) {
 
       {/* 보너스: 다른 물질 카드 */}
       {bonus && (
-        <div key={bonus.formula} className="absolute rounded-2xl bg-amber-100 border-4 border-amber-400 text-black text-center leading-none pointer-events-none"
-          style={{ left: 960, top: 190, width: 250, padding: '16px 8px', animation: 'pop .5s' }}>
+        <div key={bonus.formula} className="absolute text-black text-center leading-none pointer-events-none"
+          style={{ left: 960, top: 190, width: 250, padding: '20px 8px 26px', animation: 'pop .5s', ...artBg('ui/card_front') }}>
           <div className="text-[18px] font-bold text-amber-700">다른 물질</div>
           <div className="text-[46px] font-bold mt-2">{bonus.formula}</div>
           <div className="text-[22px] font-bold mt-2">{bonus.name}</div>
         </div>
       )}
 
-      {/* 아래: 원자 상자 */}
-      <div className="absolute rounded-2xl" style={{ left: BOX_X - boxW / 2, top: BOX_Y - 44, width: boxW, height: 116, background: '#5b3a14', boxShadow: 'inset 0 8px 16px #0008' }} />
+      {/* 아래: 원자 상자 (나무 상자는 배경 그림에 있다) */}
       {blocks.map((el, i) => (
         <div key={el} className="absolute pointer-events-auto cursor-grab" style={{ left: BOX_X - boxW / 2 + 15 + i * 110 + 5, top: BOX_Y - 36, width: 80, height: 80, padding: 12, touchAction: 'none', opacity: drag?.id === `box:${el}` ? 0.35 : 1 }}
           onPointerDown={e => { if (!locked && !busy.current) begin(`box:${el}`, e); }}>
           <AtomBall sym={el} />
         </div>
       ))}
-      <div className="absolute rounded-b-2xl pointer-events-none" style={{ left: BOX_X - boxW / 2 - 6, top: BOX_Y + 20, width: boxW + 12, height: 56, background: 'linear-gradient(#8a5a22, #4a2f0e)', boxShadow: '0 10px 16px #0006' }} />
       {blocks.map((el, i) => (
         <div key={el} className="absolute pointer-events-none text-center text-amber-100/80 text-[16px] font-bold" style={{ left: BOX_X - boxW / 2 + 15 + i * 110 + 5, top: BOX_Y + 36, width: 80 }}>{i + 1}</div>
       ))}
       {!atoms.length && !locked && (
-        <svg className="absolute pointer-events-none" style={{ left: BOX_X - 30, top: 596, animation: 'bob 1s ease-in-out infinite', transform: 'rotate(180deg)' }} width="60" height="60" viewBox="0 0 60 60">
-          <path d="M30 6 L54 34 H38 V56 H22 V34 H6 Z" fill="#fcd34d" stroke="#fff" strokeWidth="3" />
-        </svg>
+        <Art src="ui/arrow_down" className="absolute" style={{ left: BOX_X - 26, top: 596, width: 53, height: 60, animation: 'bob 1s ease-in-out infinite' }} />
       )}
 
       {/* 들고 있는 블록: 크게, 그림자는 멀리 */}

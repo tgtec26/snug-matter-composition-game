@@ -7,6 +7,7 @@ import { playSfx } from '@/game/audio';
 import { useLock } from '@/components/hooks/useLock';
 import { useDrag } from '@/components/hooks/useDrag';
 import { Burst } from '@/components/overlays/Burst';
+import { Art, artBg, artFrame } from '@/components/Art';
 
 const N = 12, CX = 640, CY = 430, R = 250, CW = 104, CH = 56, SYM = 60, GAP = 6;
 const ringPos = (i: number, r = R) => { const a = (i / N) * Math.PI * 2 - Math.PI / 2; return { x: CX + Math.cos(a) * r, y: CY + Math.sin(a) * r }; };
@@ -76,15 +77,15 @@ export function ElementCardGameOverlay({ onClose }: { onClose: (stars: number) =
 
   return (
     <div ref={stage} className="absolute inset-0 bg-slate-950/95 pointer-events-auto select-none" style={{ zIndex: 20 }}>
-      <button type="button" aria-label="닫기" onClick={close} className="absolute left-4 top-[52px] w-11 h-11 rounded-xl bg-white/15 border border-white/40 text-white text-[22px] font-bold">×</button>
+      <button type="button" aria-label="닫기" onClick={close} className="absolute left-4 top-[52px] w-11 h-11 text-white text-[22px] font-bold" style={artBg('ui/panel_glass')}>×</button>
 
       {elements.map((e, i) => {
         const p = ringPos(i);
         const isNext = pending && i === nextPos(pos, N);
         const filled = i < moved || (done && i === 0);
         return (
-          <div key={e.symbol} className={`absolute rounded-xl border-4 flex flex-col items-center justify-center leading-none ${filled ? 'bg-amber-200 border-amber-400 text-slate-900' : 'bg-sky-100 border-sky-300 text-slate-900'} ${isNext ? 'ring-4 ring-amber-300' : ''}`}
-            style={{ left: p.x - CW / 2, top: p.y - CH / 2, width: CW, height: CH, animation: isNext ? 'bob 0.8s infinite' : undefined }}>
+          <div key={e.symbol} className={`absolute rounded-xl flex flex-col items-center justify-center leading-none ${filled ? 'text-slate-900' : 'text-amber-50'} ${isNext ? 'ring-4 ring-amber-300' : ''}`}
+            style={{ left: p.x - CW / 2, top: p.y - CH / 2, width: CW, height: CH, animation: isNext ? 'bob 0.8s infinite' : undefined, ...artFrame(filled ? 'ui/panel_paper' : 'ui/plate_wood', 50, 12) }}>
             <span className="text-[19px] font-bold">{e.name.replace(/\(.*\)/, '')}</span>
             {filled && <span className="text-[15px] font-black text-sky-700 mt-0.5">{e.symbol}</span>}
           </div>
@@ -96,8 +97,8 @@ export function ElementCardGameOverlay({ onClose }: { onClose: (stars: number) =
         const p = slotPos(s), up = peek === s, cur = cursor === s && !pending && !done;
         return (
           <button key={s} type="button" aria-label={`기호 카드 ${s + 1}`} onClick={() => { setCursor(s); flip(s); }}
-            className={`absolute rounded-lg border-4 font-black text-[24px] flex items-center justify-center ${up ? 'bg-amber-100 border-amber-400 text-slate-900' : 'bg-indigo-500 border-indigo-200 text-transparent'} ${cur ? 'ring-4 ring-white' : ''}`}
-            style={{ left: p.x, top: p.y, width: SYM, height: SYM, transform: up ? 'scale(1.15)' : undefined, transition: 'transform .15s', touchAction: 'manipulation' }}>
+            className={`absolute rounded-lg font-black text-[24px] flex items-center justify-center ${up ? 'text-slate-900' : 'text-transparent'} ${cur ? 'ring-4 ring-white' : ''}`}
+            style={{ left: p.x, top: p.y, width: SYM, height: SYM, transform: up ? 'scale(1.15)' : undefined, transition: 'transform .15s', touchAction: 'manipulation', ...artBg(up ? 'ui/card_front' : 'ui/card_back') }}>
             {up ? elements[el].symbol : '?'}
           </button>
         );
@@ -105,12 +106,15 @@ export function ElementCardGameOverlay({ onClose }: { onClose: (stars: number) =
 
       {/* 말: 일치한 뒤에만 끌 수 있다 (집으면 커진다) */}
       {!done && (
-        <div className={`absolute rounded-full bg-rose-500 border-4 border-white ${pending ? 'cursor-grab' : ''}`}
-          style={{ left: pieceX - 24, top: pieceY - 24, width: 48, height: 48, touchAction: 'none', transform: drag ? 'scale(1.25)' : undefined,
-            boxShadow: drag ? '0 18px 10px -6px rgba(0,0,0,.6)' : '0 5px 0 rgba(0,0,0,.45)', animation: pending && !drag ? 'bob .7s infinite' : undefined, pointerEvents: pending ? 'auto' : 'none', zIndex: 5 }}
-          onPointerDown={e => { if (pending && !locked) begin('piece', e); }} />
+        <div className={`absolute ${pending ? 'cursor-grab' : ''}`}
+          style={{ left: pieceX - 24, top: pieceY - 50, width: 48, height: 74, touchAction: 'none', transform: drag ? 'scale(1.25)' : undefined,
+            animation: pending && !drag ? 'bob .7s infinite' : undefined, pointerEvents: pending ? 'auto' : 'none', zIndex: 5 }}
+          onPointerDown={e => { if (pending && !locked) begin('piece', e); }}>
+          {/* 세워 놓은 말 그림(48×74). 잡는 영역을 원(48×48)에서 그림 전체로 위로 넓혀 머리를 잡아도 집힌다 */}
+          <Art src="ui/game_piece" className="absolute inset-0 w-full h-full" style={{ filter: drag ? 'drop-shadow(0 16px 5px rgba(0,0,0,.5))' : undefined }} />
+        </div>
       )}
-      {pending && !drag && <div className="absolute pointer-events-none text-amber-300 text-[36px] font-black" style={{ left: nxt.x - 12, top: nxt.y - 70 }}>↓</div>}
+      {pending && !drag && <Art src="ui/arrow_down" className="absolute" style={{ left: nxt.x - 16, top: nxt.y - 72, width: 32, height: 36 }} />}
 
       {wrong > 0 && !done && <div className="absolute flex gap-1.5" style={{ left: 20, top: 110 }}>{Array.from({ length: Math.min(wrong, 12) }, (_, i) => <span key={i} className="w-3.5 h-3.5 rounded-full bg-red-400" />)}</div>}
       <div className="absolute inset-x-0 text-center text-[24px] text-white" style={{ bottom: 22, textShadow: '0 2px 6px #000' }}>{msg}</div>
@@ -121,7 +125,7 @@ export function ElementCardGameOverlay({ onClose }: { onClose: (stars: number) =
         <div className="absolute flex flex-col items-center gap-3" style={{ left: CX - 140, top: CY - 100, width: 280, animation: 'pop .6s .3s both' }}>
           <div className="text-amber-300 text-[36px] font-black">보너스 별</div>
           <div className="text-amber-300 text-[96px] font-black leading-none">+{cardGameStars(wrong)}</div>
-          <button type="button" onClick={close} className="h-[52px] px-8 rounded-xl bg-amber-400 border-2 border-amber-200 text-black text-[20px] font-bold">돌아가기</button>
+          <button type="button" onClick={close} className="h-[56px] w-[180px] text-black text-[20px] font-bold" style={artBg('ui/button_amber')}>돌아가기</button>
         </div>
       </>)}
     </div>

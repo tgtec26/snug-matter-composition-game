@@ -8,21 +8,20 @@ import { playSfx } from '@/game/audio';
 import { useLock } from '@/components/hooks/useLock';
 import { useDrag } from '@/components/hooks/useDrag';
 import { Burst } from '@/components/overlays/Burst';
+import { Art, NUCLEUS_ART, NUCLEUS_SHADOW, Sphere, artBg, artFrame } from '@/components/Art';
 import type { Step } from '@/game/types';
 
 const CX = 640, CY = 380, NUC_R = 90, RING_R = 190, OUT_R = RING_R + 50, MAX_GAIN = 3;
 const GL = 440, GT = 190, CELL = 100;   // 격자 (RoomScene.lattice 와 같은 좌표)
-const ballBg = 'radial-gradient(circle at 35% 30%, #bfdbfe, #3b82f6 55%, #1e3a8a)';
 const dist = (x: number, y: number, ax: number, ay: number) => Math.hypot(x - ax, y - ay);
 /** 원자 번호만큼의 전자를 원 둘레에 균등하게 (껍질 구분 없음) */
 const ringPos = (i: number, n: number) => { const a = (i / n) * Math.PI * 2 - Math.PI / 2; return { x: CX + Math.cos(a) * RING_R, y: CY + Math.sin(a) * RING_R }; };
 
 const Electron = ({ size, lift = false }: { size: number; lift?: boolean }) => (
   <div className="relative" style={{ width: size, height: size, transform: lift ? 'scale(1.15)' : undefined }}>
-    <div className="absolute rounded-full bg-black/40 blur-[3px]"
-      style={{ left: size * 0.1, right: size * 0.1, bottom: lift ? -size * 0.45 : -size * 0.08, height: size * 0.28 }} />
-    <div className="absolute inset-0 rounded-full border border-white/40 flex items-center justify-center text-white font-bold"
-      style={{ background: ballBg, fontSize: size * 0.55 }}>−</div>
+    <Sphere src="items/electron" size={size} lift={lift} />
+    <div className="absolute inset-0 flex items-center justify-center text-white font-bold"
+      style={{ fontSize: size * 0.55, textShadow: '0 1px 3px #0009' }}>−</div>
   </div>
 );
 
@@ -109,12 +108,12 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
 
   return (
     <div ref={stage} className="absolute inset-0 select-none">
-      <div className="absolute left-1/2 top-[52px] -translate-x-1/2 rounded-full bg-black/60 px-6 py-1.5 text-amber-200 text-[20px] font-bold whitespace-nowrap">
+      <div className="absolute left-1/2 top-[52px] -translate-x-1/2 px-7 py-1.5 text-amber-200 text-[20px] font-bold whitespace-nowrap" style={artFrame('ui/plate_wood', 60, 18)}>
         만들 이온 {targetIon.name} {targetIon.formula}
       </div>
 
       {/* 실시간 이온식·이름 */}
-      <div className="absolute rounded-2xl bg-black/50 border border-white/20 text-center" style={{ left: 980, top: 120, width: 260, height: 150 }}>
+      <div className="absolute text-center" style={{ left: 980, top: 120, width: 260, height: 150, ...artFrame('ui/panel_glass', 50, 22) }}>
         <div className="text-[60px] font-bold text-white leading-[80px]" style={{ textShadow: '0 3px 8px #000' }}>{formula}</div>
         <div className="text-[26px] font-bold text-amber-200 h-[40px]">{live?.ok ? live.ion.name : ''}</div>
       </div>
@@ -125,10 +124,11 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
 
       {/* 원자핵 */}
       <div key={tick} className="absolute" style={{ left: CX - NUC_R, top: CY - NUC_R, width: NUC_R * 2, height: NUC_R * 2, animation: tick && !done ? 'shake .3s' : undefined }}>
-        <div className="absolute rounded-full bg-black/40 blur-md" style={{ left: 15, right: 15, bottom: -34, height: 26 }} />
-        <div className="absolute inset-0 rounded-full border-2 border-white/40 flex items-center justify-center text-[46px] font-bold text-red-200"
-          style={{ background: 'radial-gradient(circle at 35% 30%, #4b5563, #1f2937 70%)', animation: done ? 'pop .6s' : undefined }}>
-          +{Z}
+        <div className="absolute rounded-full bg-black/40 blur-md" style={NUCLEUS_SHADOW} />
+        <div className="absolute inset-0 rounded-full border-2 border-transparent flex items-center justify-center text-[46px] font-bold text-red-200"
+          style={{ animation: done ? 'pop .6s' : undefined }}>
+          <Art src="fx/nucleus" className="absolute" style={NUCLEUS_ART} />
+          <span className="relative" style={{ textShadow: '0 2px 6px #000' }}>+{Z}</span>
         </div>
         {done && <Burst count={28} radius={260} />}
       </div>
@@ -143,24 +143,24 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
       ); })}
 
       {/* 전자 상자 */}
-      <div className="absolute rounded-2xl bg-black/50 border border-white/20 flex flex-col items-center justify-center"
-        style={{ left: 40, top: 300, width: 150, height: 160 }}>
+      <div className="absolute flex flex-col items-center justify-center"
+        style={{ left: 40, top: 300, width: 150, height: 160, ...artFrame('ui/tray_wood', 40, 30) }}>
         <div className="cursor-grab pointer-events-auto" style={{ width: 76, height: 76, padding: 10, touchAction: 'none' }} onPointerDown={start('box:e')}>
           <Electron size={56} />
         </div>
       </div>
 
       <button type="button" disabled={done} onClick={finish}
-        className="absolute pointer-events-auto rounded-2xl border-2 text-[26px] font-bold bg-amber-400 border-amber-100 text-black"
-        style={{ left: 1030, top: 340, width: 210, height: 80 }}>완성</button>
+        className="absolute pointer-events-auto text-[26px] font-bold text-black"
+        style={{ left: 1030, top: 340, width: 210, height: 80, ...artBg('ui/button_amber') }}>완성</button>
 
       <div className="absolute inset-x-0 text-center text-[24px] text-white" style={{ top: 712, textShadow: '0 2px 6px #000' }}>{msg}</div>
 
       {done && (
         <>
           <div className="absolute inset-0 bg-white pointer-events-none" style={{ animation: 'fadeout .6s forwards' }} />
-          <div className="absolute rounded-2xl bg-amber-100 border-4 border-amber-400 text-black text-center pointer-events-none"
-            style={{ left: 1040, top: 470, width: 190, padding: 12, animation: 'pop .5s .3s both' }}>
+          <div className="absolute text-black text-center pointer-events-none"
+            style={{ left: 1040, top: 470, width: 190, padding: '16px 12px 22px', animation: 'pop .5s .3s both', ...artBg('ui/card_front') }}>
             <div className="text-[46px] font-bold leading-none">{targetIon.formula}</div>
             <div className="text-[20px] font-bold mt-1">{targetIon.name}</div>
           </div>
@@ -177,16 +177,16 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
 }
 
 type Grid = (string | null)[][];
-const tileStyle = (v: string) => (v === '+'
-  ? { bg: 'radial-gradient(circle at 35% 30%, #fed7aa, #f97316 55%, #9a3412)', label: 'Na⁺' }
-  : { bg: 'radial-gradient(circle at 35% 30%, #bbf7d0, #22c55e 55%, #166534)', label: 'Cl⁻' });
+const tileStyle = (v: string) => (v === '+' ? { src: 'items/tile_na', label: 'Na⁺' } : { src: 'items/tile_cl', label: 'Cl⁻' });
 
 const Tile = ({ v, size = 84, lift = false, bad = false }: { v: string; size?: number; lift?: boolean; bad?: boolean }) => (
   <div className="relative" style={{ width: size, height: size, transform: lift ? 'scale(1.15)' : undefined, animation: bad ? 'shake .3s 2' : undefined }}>
-    <div className="absolute rounded-full bg-black/40 blur-[4px]"
-      style={{ left: size * 0.1, right: size * 0.1, bottom: lift ? -size * 0.4 : -size * 0.06, height: size * 0.26 }} />
-    <div className={`absolute inset-0 rounded-full border-2 flex items-center justify-center text-white font-bold ${bad ? 'border-red-400' : 'border-white/50'}`}
-      style={{ background: tileStyle(v).bg, fontSize: size * 0.36, boxShadow: bad ? '0 0 0 5px rgba(248,113,113,.8)' : undefined }}>{tileStyle(v).label}</div>
+    {/* 납작한 원판 그림(아래 60%)을 칸 가운데로 올린다. 그림자는 그림에 있고, 집으면 멀리 한 겹 더 */}
+    <Art src={tileStyle(v).src} className="absolute" style={{ left: 0, top: -size * 0.13, width: size, height: size,
+      filter: lift ? `drop-shadow(0 ${size * 0.35}px 5px rgba(0,0,0,.45))` : undefined }} />
+    {bad && <div className="absolute rounded-[50%] border-4 border-red-400" style={{ left: -3, top: size * 0.18, width: size + 6, height: size * 0.68, boxShadow: '0 0 0 3px rgba(248,113,113,.5)' }} />}
+    <div className="absolute inset-0 flex items-center justify-center text-white font-bold"
+      style={{ fontSize: size * 0.36, textShadow: '0 1px 4px #000a' }}>{tileStyle(v).label}</div>
   </div>
 );
 
@@ -255,15 +255,15 @@ function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string,
   const hidden = drag?.id.startsWith('cell:') ? drag.id.slice(5) : '';
   return (
     <div ref={stage} className="absolute inset-0 select-none">
-      <div className="absolute left-1/2 top-[52px] -translate-x-1/2 rounded-full bg-black/60 px-6 py-1.5 text-amber-200 text-[20px] font-bold whitespace-nowrap">염화 나트륨 만들기</div>
+      <div className="absolute left-1/2 top-[52px] -translate-x-1/2 px-7 py-1.5 text-amber-200 text-[20px] font-bold whitespace-nowrap" style={artFrame('ui/plate_wood', 60, 18)}>염화 나트륨 만들기</div>
 
       {/* 격자 판 */}
-      <div className="absolute rounded-2xl bg-black/40 border-2 border-white/25" style={{ left: GL - 10, top: GT - 10, width: size * CELL + 20, height: size * CELL + 20 }} />
+      <div className="absolute" style={{ left: GL - 10, top: GT - 10, width: size * CELL + 20, height: size * CELL + 20, ...artFrame('ui/panel_glass', 50, 22) }} />
       {grid.map((row, r) => row.map((v, c) => {
         const key = `${r},${c}`, isCur = cur.r === r && cur.c === c;
         return (
-          <div key={key} className={`absolute rounded-xl border-2 border-dashed ${isCur ? 'border-amber-300' : 'border-white/25'}`}
-            style={{ left: GL + c * CELL + 4, top: GT + r * CELL + 4, width: CELL - 8, height: CELL - 8 }}>
+          <div key={key} className="absolute"
+            style={{ left: GL + c * CELL + 4, top: GT + r * CELL + 4, width: CELL - 8, height: CELL - 8, ...artBg(isCur ? 'ui/lattice_cell_lit' : 'ui/lattice_cell') }}>
             {v && key !== hidden && (
               <div className="absolute cursor-grab pointer-events-auto flex items-center justify-center" style={{ left: -4, top: -4, width: CELL, height: CELL, touchAction: 'none', animation: 'pop .25s' }}
                 onPointerDown={start(`cell:${key}`)}>
@@ -275,7 +275,7 @@ function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string,
       }))}
 
       {/* 타일 상자 */}
-      <div className="absolute rounded-2xl bg-black/50 border border-white/20 flex flex-col items-center justify-center gap-6" style={{ left: 60, top: 250, width: 170, height: 300 }}>
+      <div className="absolute flex flex-col items-center justify-center gap-6" style={{ left: 60, top: 250, width: 170, height: 300, ...artFrame('ui/tray_wood', 40, 30) }}>
         {(['+', '-'] as const).map(v => (
           <div key={v} className="cursor-grab pointer-events-auto flex items-center justify-center" style={{ width: 100, height: 100, touchAction: 'none' }} onPointerDown={start(`tray:${v}`)}>
             <Tile v={v} />
@@ -285,8 +285,8 @@ function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string,
 
       {done && (
         <>
-          <div className="absolute rounded-2xl bg-amber-100 border-4 border-amber-400 text-black text-center pointer-events-none"
-            style={{ left: 910, top: 320, width: 340, padding: 14, animation: 'pop .5s .5s both' }}>
+          <div className="absolute text-black text-center pointer-events-none"
+            style={{ left: 910, top: 320, width: 340, padding: '18px 14px 24px', animation: 'pop .5s .5s both', ...artBg('ui/card_front') }}>
             <div className="text-[26px] font-bold leading-tight whitespace-nowrap">이온으로 이루어진 물질</div>
             <div className="text-[20px] mt-1">염화 나트륨</div>
           </div>

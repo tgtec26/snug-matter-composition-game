@@ -9,6 +9,7 @@ import { useLock } from '@/components/hooks/useLock';
 import { useDrag } from '@/components/hooks/useDrag';
 import { Burst } from '@/components/overlays/Burst';
 import { ElementCardGameOverlay } from '@/components/overlays/ElementCardGameOverlay';
+import { artBg, artFrame } from '@/components/Art';
 import type { Step } from '@/game/types';
 
 const CELL = 62, COLS = 18, ROWS = 4, LEFT = 82, TOP = 176;
@@ -90,7 +91,7 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
 
   return (
     <div ref={stage} className="absolute inset-0 select-none">
-      <div className="absolute left-1/2 top-[52px] -translate-x-1/2 rounded-full bg-black/60 px-6 py-1.5 text-amber-200 text-[20px] font-bold whitespace-nowrap">
+      <div className="absolute left-1/2 top-[52px] -translate-x-1/2 px-7 py-1.5 text-amber-200 text-[20px] font-bold whitespace-nowrap" style={artFrame('ui/plate_wood', 60, 18)}>
         놓을 원소 {target?.name} {target?.symbol}
       </div>
 
@@ -115,10 +116,9 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
         const cur = cursor && cursor.p === c.p && cursor.g === c.g;
         return (
           <div key={`${c.p}-${c.g}`} className="absolute" style={{ left: LEFT + (c.g - 1) * CELL, top: TOP + (c.p - 1) * CELL, width: CELL, height: CELL, padding: 2 }}>
-            <div className={`h-full w-full rounded-md border-2 flex flex-col items-center justify-center leading-none ${
-              hit ? 'bg-amber-300 border-white text-black' : line ? 'bg-amber-100/40 border-amber-300' : el ? 'bg-sky-100/90 border-sky-300 text-slate-900' : 'bg-white/10 border-white/15'
-            } ${hover ? 'ring-4 ring-amber-300' : ''} ${cur ? 'ring-4 ring-white' : ''}`}
-              style={{ animation: hit ? 'pop .6s' : undefined, boxShadow: hit ? '0 0 26px 8px #fcd34d' : undefined }}>
+            <div className={`h-full w-full rounded-md flex flex-col items-center justify-center leading-none text-slate-900 ${hover ? 'ring-4 ring-amber-300' : ''} ${cur ? 'ring-4 ring-white' : ''}`}
+              style={{ animation: hit ? 'pop .6s' : undefined, boxShadow: hit ? '0 0 26px 8px #fcd34d' : undefined,
+                ...artBg(hit ? 'ui/cell_hit' : line ? 'ui/cell_line' : el ? 'ui/cell_bright' : 'ui/cell_empty') }}>
               {el && (hit
                 ? <span className="text-[24px] font-bold">{el.symbol}</span>
                 : <span className="text-[22px] font-bold">{el.number}</span>)}
@@ -137,8 +137,8 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
         </div>
       )}
       {drag && target && (
-        <div className="absolute pointer-events-none" style={{ left: drag.x - 60, top: drag.y - 66, width: 120, height: 120, transform: 'scale(1.15)' }}>
-          <Card symbol={target.symbol} name={target.name} lift />
+        <div className="absolute pointer-events-none" style={{ left: drag.x - 60, top: drag.y - 66, width: 120, height: 120, transform: 'scale(1.15)', filter: 'drop-shadow(0 22px 6px rgba(0,0,0,.45))' }}>
+          <Card symbol={target.symbol} name={target.name} />
         </div>
       )}
       {done && target && (
@@ -153,8 +153,8 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
       </div>
 
       {/* 보너스 놀이 입구 (5-5): 별을 받은 판에서는 숨긴다 (한 판에 한 번) */}
-      {!done && !bonusStarTaken && <button type="button" aria-label="보너스 놀이" onClick={e => { openBonus(); e.currentTarget.blur(); }} className="absolute pointer-events-auto rounded-xl border-4 border-amber-300 bg-indigo-500/80 text-amber-200 text-[40px] font-black"
-        style={{ left: 1150, top: 500, width: 76, height: 104, animation: 'bob 1.4s infinite' }}>?</button>}
+      {!done && !bonusStarTaken && <button type="button" aria-label="보너스 놀이" onClick={e => { openBonus(); e.currentTarget.blur(); }} className="absolute pointer-events-auto text-amber-200 text-[40px] font-black"
+        style={{ left: 1150, top: 500, width: 76, height: 104, animation: 'bob 1.4s infinite', textShadow: '0 2px 4px #000', ...artBg('ui/card_back') }}>?</button>}
       {bonus && <ElementCardGameOverlay onClose={closeBonus} />}
 
       <div className="absolute rounded-full bg-white/15 overflow-hidden" style={{ left: 340, top: 680, width: 600, height: 14 }}>
@@ -168,12 +168,10 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
 }
 
 /** 카드에는 기호·이름만 — 원자 번호는 원자 조립기에서 센 양성자수로 떠올려 칸을 찾는다 */
-const Card = ({ symbol, name, lift = false }: { symbol: string; name: string; lift?: boolean }) => (
-  <div className="relative h-full w-full">
-    <div className="absolute rounded-full bg-black/40 blur-[4px]" style={{ left: 10, right: 10, bottom: lift ? -22 : -4, height: 16 }} />
-    <div className="absolute inset-0 rounded-2xl bg-amber-100 border-4 border-amber-400 text-black text-center flex flex-col items-center justify-center leading-none">
-      <div className="text-[46px] font-bold">{symbol}</div>
-      <div className="text-[18px] font-bold mt-1">{name}</div>
-    </div>
+/** 카드 그림에 바닥 그림자가 있다. 집었을 때 멀어지는 그림자는 드래그 쪽 drop-shadow가 맡는다. */
+const Card = ({ symbol, name }: { symbol: string; name: string }) => (
+  <div className="h-full w-full text-black text-center flex flex-col items-center justify-center leading-none pb-1" style={artBg('ui/card_front')}>
+    <div className="text-[46px] font-bold">{symbol}</div>
+    <div className="text-[18px] font-bold mt-1">{name}</div>
   </div>
 );

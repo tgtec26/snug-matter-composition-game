@@ -8,14 +8,15 @@ import { playSfx } from '@/game/audio';
 import { useLock } from '@/components/hooks/useLock';
 import { useDrag } from '@/components/hooks/useDrag';
 import { Burst } from '@/components/overlays/Burst';
+import { Art, NUCLEUS_ART, NUCLEUS_SHADOW, Sphere, artBg, artFrame } from '@/components/Art';
 import type { Step } from '@/game/types';
 
 const CX = 640, CY = 380, NUC_R = 90, RING_R = 200, MAX = 20;
 type Kind = 'p' | 'n' | 'e';
-const STYLE: Record<Kind, { bg: string; sym: string; name: string }> = {
-  p: { bg: 'radial-gradient(circle at 35% 30%, #fecaca, #ef4444 55%, #991b1b)', sym: '+', name: '양성자' },
-  n: { bg: 'radial-gradient(circle at 35% 30%, #f3f4f6, #9ca3af 55%, #4b5563)', sym: '', name: '중성자' },
-  e: { bg: 'radial-gradient(circle at 35% 30%, #bfdbfe, #3b82f6 55%, #1e3a8a)', sym: '−', name: '전자' },
+const STYLE: Record<Kind, { src: string; sym: string; name: string }> = {
+  p: { src: 'items/proton', sym: '+', name: '양성자' },
+  n: { src: 'items/neutron', sym: '', name: '중성자' },
+  e: { src: 'items/electron', sym: '−', name: '전자' },
 };
 const slotPos = (i: number) => { const a = (i / MAX) * Math.PI * 2 - Math.PI / 2; return { x: CX + Math.cos(a) * RING_R, y: CY + Math.sin(a) * RING_R }; };
 /** 원자핵 안 입자 자리: 해바라기 배열, 양성자·중성자를 번갈아 섞는다 */
@@ -31,10 +32,9 @@ interface S { p: number; n: number; slots: number[]; wobble: number; fails: numb
 
 const Ball = ({ kind, size, lift = false }: { kind: Kind; size: number; lift?: boolean }) => (
   <div className="relative" style={{ width: size, height: size, transform: lift ? 'scale(1.15)' : undefined }}>
-    <div className="absolute rounded-full bg-black/40 blur-[3px]"
-      style={{ left: size * 0.1, right: size * 0.1, bottom: lift ? -size * 0.45 : -size * 0.08, height: size * 0.28, transition: 'bottom .1s' }} />
-    <div className="absolute inset-0 rounded-full border border-white/40 flex items-center justify-center text-white font-bold"
-      style={{ background: STYLE[kind].bg, fontSize: size * 0.55 }}>{STYLE[kind].sym}</div>
+    <Sphere src={STYLE[kind].src} size={size} lift={lift} />
+    <div className="absolute inset-0 flex items-center justify-center text-white font-bold"
+      style={{ fontSize: size * 0.55, textShadow: '0 1px 3px #0009' }}>{STYLE[kind].sym}</div>
   </div>
 );
 
@@ -171,7 +171,7 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
   return (
     <div ref={stage} className="absolute inset-0 select-none">
       {/* 주문 목표 + 실시간 원소 이름 */}
-      <div className="absolute left-1/2 top-[52px] -translate-x-1/2 rounded-full bg-black/60 px-6 py-1.5 text-amber-200 text-[20px] font-bold">
+      <div className="absolute left-1/2 top-[52px] -translate-x-1/2 px-7 py-1.5 text-amber-200 text-[20px] font-bold whitespace-nowrap" style={artFrame('ui/plate_wood', 60, 18)}>
         만들 원소 {target?.name} {target?.symbol}
       </div>
       <div className="absolute left-1/2 top-[100px] -translate-x-1/2 text-[44px] font-bold text-white h-[56px] whitespace-nowrap" style={{ textShadow: '0 3px 8px #000' }}>
@@ -180,8 +180,7 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
 
       {/* 전자 자리 */}
       {Array.from({ length: MAX }, (_, i) => { const q = slotPos(i); return (
-        <div key={i} className="absolute rounded-full border-2 border-dashed border-sky-200/40"
-          style={{ left: q.x - 22, top: q.y - 22, width: 44, height: 44 }} />
+        <Art key={i} src="items/slot_socket" className="absolute" style={{ left: q.x - 28, top: q.y - 34, width: 56, height: 56 }} />
       ); })}
       {/* 놓인 전자 */}
       {s.slots.map(i => { const q = slotPos(i); return i === hiddenEl ? null : (
@@ -193,10 +192,11 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
 
       {/* 원자핵: 그림자 타원 + 구 */}
       <div key={failTick} className="absolute" style={{ left: CX - NUC_R, top: CY - NUC_R, width: NUC_R * 2, height: NUC_R * 2, animation: failTick && !done ? 'shake .3s' : undefined }}>
-        <div className="absolute rounded-full bg-black/40 blur-md" style={{ left: 15, right: 15, bottom: -34, height: 26 }} />
-        <div className={`absolute inset-0 rounded-full border-2 pointer-events-auto ${drag && drag.id.startsWith('box:') && drag.id !== 'box:e' && dist(drag.x, drag.y, CX, CY) <= NUC_R + 20 ? 'border-amber-300' : 'border-white/40'}`}
-          style={{ background: 'radial-gradient(circle at 35% 30%, #4b5563, #1f2937 70%)', animation: done ? 'pop .6s' : undefined, touchAction: 'none', cursor: 'grab' }}
+        <div className="absolute rounded-full bg-black/40 blur-md" style={NUCLEUS_SHADOW} />
+        <div className={`absolute inset-0 rounded-full border-2 pointer-events-auto ${drag && drag.id.startsWith('box:') && drag.id !== 'box:e' && dist(drag.x, drag.y, CX, CY) <= NUC_R + 20 ? 'border-amber-300' : 'border-transparent'}`}
+          style={{ animation: done ? 'pop .6s' : undefined, touchAction: 'none', cursor: 'grab' }}
           onPointerDown={pullFromNucleus}>
+          <Art src="fx/nucleus" className="absolute" style={NUCLEUS_ART} />
           {kinds.map((k, i) => { const q = dotPos(i); return (
             <div key={i} className="absolute" style={{ left: NUC_R + q.x - 10, top: NUC_R + q.y - 10, width: 20, height: 20 }}><Ball kind={k} size={20} /></div>
           ); })}
@@ -207,22 +207,22 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
       <div className="absolute text-[34px] font-bold text-sky-300" style={{ left: CX - 60, top: CY + NUC_R + 30, width: 120, textAlign: 'center', textShadow: '0 2px 6px #000' }}>−{s.slots.length}</div>
 
       {/* 입자 상자 */}
-      <div className="absolute rounded-2xl bg-black/50 border border-white/20 flex flex-col items-center justify-center gap-5"
-        style={{ left: 40, top: 190, width: 190, height: 400 }}>
+      <div className="absolute flex flex-col items-center justify-center gap-5"
+        style={{ left: 40, top: 190, width: 190, height: 400, ...artFrame('ui/tray_wood', 40, 30) }}>
         {trayKinds.map(k => (
           <div key={k} className="flex flex-col items-center gap-1">
             <div className="cursor-grab pointer-events-auto" style={{ width: 76, height: 76, padding: 10, touchAction: 'none' }} onPointerDown={start(`box:${k}`)}>
               <Ball kind={k} size={56} />
             </div>
-            <div className="text-[16px] text-white/80">{STYLE[k].name} ({k.toUpperCase()})</div>
+            <div className="text-[16px] font-bold text-amber-50" style={{ textShadow: '0 1px 3px #000' }}>{STYLE[k].name} ({k.toUpperCase()})</div>
           </div>
         ))}
       </div>
 
       {/* 완료 버튼 */}
       <button type="button" disabled={s.p < 1 || !!done} onClick={finish}
-        className={`absolute pointer-events-auto rounded-2xl border-2 text-[26px] font-bold ${s.p < 1 ? 'bg-white/10 border-white/20 text-white/40' : 'bg-amber-400 border-amber-100 text-black'}`}
-        style={{ left: 1030, top: 340, width: 210, height: 80 }}>
+        className={`absolute pointer-events-auto text-[26px] font-bold text-black ${s.p < 1 ? 'grayscale opacity-50' : ''}`}
+        style={{ left: 1030, top: 340, width: 210, height: 80, ...artBg('ui/button_amber') }}>
         완성
       </button>
 
@@ -236,8 +236,8 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
       {done && (
         <>
           <div className="absolute inset-0 bg-white pointer-events-none" style={{ animation: 'fadeout .6s forwards' }} />
-          <div className="absolute rounded-2xl bg-amber-100 border-4 border-amber-400 text-black text-center pointer-events-none"
-            style={{ left: 1040, top: 470, width: 190, padding: 12, animation: 'pop .5s .3s both' }}>
+          <div className="absolute text-black text-center pointer-events-none"
+            style={{ left: 1040, top: 470, width: 190, padding: '16px 12px 22px', animation: 'pop .5s .3s both', ...artBg('ui/card_front') }}>
             <div className="text-[46px] font-bold leading-none">{done.symbol}</div>
             <div className="text-[20px] font-bold mt-1">{done.name}</div>
           </div>

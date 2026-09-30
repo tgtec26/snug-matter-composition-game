@@ -9,10 +9,12 @@ import { playSfx } from '@/game/audio';
 import { useLock } from '@/components/hooks/useLock';
 import { Burst } from '@/components/overlays/Burst';
 import { AtomBall } from '@/components/overlays/MoleculeBenchOverlay';
+import { Art, artBg, artFrame } from '@/components/Art';
 
 type Answer = '원소' | '화합물';
 const DOORS: { a: Answer; left: number; dir: 1 | -1 }[] = [{ a: '원소', left: 330, dir: -1 }, { a: '화합물', left: 650, dir: 1 }];
 const W = 300, H = 400, TOP = 250, TRAVEL = 180;
+const DH = 338;   // 문 그림 높이 (그림 비 454:512). 자리(W×H) 아래쪽에 붙여 손잡이 위치는 그대로 둔다.
 
 /** 5-3 갈림길: 손잡이를 끝까지 끌어 문을 연다. 왼쪽 문은 왼쪽으로, 오른쪽 문은 오른쪽으로 당긴다. */
 export function ClassifyOverlay() {
@@ -88,7 +90,7 @@ export function ClassifyOverlay() {
   return (
     <div ref={stage} className="absolute inset-0 select-none">
       {/* 위: 방금 만든 물질 (공이 서로 닿은 모양) */}
-      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-5 rounded-2xl bg-black/55 px-8" style={{ top: 56, height: 96 }}>
+      <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-5 px-10" style={{ top: 56, height: 96, ...artFrame('ui/plate_wood', 60, 24) }}>
         <div className="flex">{atoms.map((k, i) => <div key={i} style={{ marginLeft: i ? -2 : 0 }}><AtomBall sym={k} size={48} /></div>)}</div>
         <span className="text-white text-[36px] font-bold whitespace-nowrap">{m?.formula} · {m?.name}</span>
       </div>
@@ -100,29 +102,27 @@ export function ClassifyOverlay() {
           return (
             <div key={a} className="absolute" style={{ left, top: TOP, width: W, height: H, animation: shake && p === 1 ? 'shake .3s' : undefined }}>
               {/* 문 뒤: 밝은 빛 */}
-              <div className="absolute inset-0 rounded-t-[120px] border-4 border-amber-900"
-                style={{ background: good === a ? 'radial-gradient(circle, #fef9c3, #fcd34d)' : 'radial-gradient(circle, #1e293b, #020617)', transition: 'background .4s' }} />
+              <div className="absolute inset-x-0 bottom-0" style={{ height: DH, ...artBg(good === a ? 'ui/doorway_lit' : 'ui/doorway_dark') }} />
               {good === a && <div className="absolute" style={{ left: W / 2, top: H / 2 }}><Burst count={30} radius={230} /></div>}
               {/* 문짝 */}
-              <div className="absolute inset-0 rounded-t-[120px] border-4 border-amber-950 flex flex-col items-center"
-                style={{ background: 'linear-gradient(90deg,#92400e,#b45309 50%,#92400e)', transformOrigin: `${hinge} center`, transform: `rotateY(${-dir * p * 78}deg)`,
-                  transition: grab === a ? 'none' : 'transform .4s ease-out', boxShadow: sel === a ? '0 0 0 6px #fcd34d, 0 0 30px 10px #fcd34d88' : '0 10px 24px #0008', backfaceVisibility: 'hidden' }}>
-                <div className="mt-24 text-amber-100 font-bold text-[40px] whitespace-nowrap">{a}</div>
-                <div className="absolute rounded-full bg-black/30" style={{ [dir === -1 ? 'right' : 'left']: 8, top: 0, bottom: 0, width: 4 }} />
+              <div className="absolute inset-x-0 bottom-0 flex flex-col items-center"
+                style={{ height: DH, ...artBg('ui/door'), transformOrigin: `${hinge} center`, transform: `rotateY(${-dir * p * 78}deg)`,
+                  transition: grab === a ? 'none' : 'transform .4s ease-out', filter: sel === a ? 'drop-shadow(0 0 6px #fcd34d) drop-shadow(0 0 16px #fcd34d)' : 'drop-shadow(0 10px 12px #0008)', backfaceVisibility: 'hidden' }}>
+                <div className="mt-[62px] text-amber-100 font-bold text-[40px] whitespace-nowrap" style={{ textShadow: '0 2px 6px #000, 0 0 3px #000' }}>{a}</div>
               </div>
               {/* 손잡이: 끌어서 연다 */}
               {!good && (
                 <div className="absolute pointer-events-auto cursor-grab rounded-full flex items-center justify-center"
                   style={{ [dir === -1 ? 'right' : 'left']: 6, top: H / 2 - 10, width: 72, height: 72, touchAction: 'none', transform: `translateX(${dir * p * TRAVEL}px)` }}
                   onPointerDown={e => pull(a, dir, e)}>
-                  <div className="rounded-full" style={{ width: 44, height: 44, background: 'radial-gradient(circle at 35% 30%, #fef3c7, #f59e0b 60%, #92400e)', border: '2px solid #fff', boxShadow: grab === a ? '0 14px 10px #0007' : '0 4px 4px #0007' }} />
+                  <Art src="ui/knob" style={{ width: 60, height: 55, transform: dir === -1 ? 'scaleX(-1)' : undefined, filter: grab === a ? 'drop-shadow(0 14px 6px #0007)' : 'drop-shadow(0 4px 3px #0007)' }} />
                 </div>
               )}
               {/* 손잡이를 당길 방향 안내 */}
               {!p && !locked && !good && (
-                <svg className="absolute pointer-events-none" style={{ [dir === -1 ? 'right' : 'left']: dir === -1 ? 90 : 90, top: H / 2 + 4, animation: 'bob 1s ease-in-out infinite' }} width="46" height="40" viewBox="0 0 46 40">
-                  <path d={dir === -1 ? 'M4 20 L24 4 V13 H42 V27 H24 V36 Z' : 'M42 20 L22 4 V13 H4 V27 H22 V36 Z'} fill="#fcd34d" stroke="#fff" strokeWidth="2" />
-                </svg>
+                <div className="absolute pointer-events-none" style={{ [dir === -1 ? 'right' : 'left']: 90, top: H / 2 + 4, width: 46, height: 40, animation: 'bob 1s ease-in-out infinite' }}>
+                  <Art src="ui/arrow_down" style={{ width: 35, height: 40, margin: '0 auto', transform: `rotate(${dir === -1 ? 90 : -90}deg)` }} />
+                </div>
               )}
             </div>
           );
@@ -130,7 +130,7 @@ export function ClassifyOverlay() {
       </div>
 
       {good && (
-        <div className="absolute left-1/2 -translate-x-1/2 rounded-2xl bg-white text-slate-900 text-center font-bold" style={{ top: 168, padding: '10px 22px', fontSize: 26, animation: 'pop .5s', wordBreak: 'keep-all' }}>
+        <div className="absolute left-1/2 -translate-x-1/2 text-slate-900 text-center font-bold whitespace-nowrap" style={{ top: 168, padding: '10px 28px', fontSize: 26, animation: 'pop .5s', wordBreak: 'keep-all', ...artFrame('ui/panel_paper', 40, 16) }}>
           <span className="text-amber-600">{kinds.length === 1 ? '한' : kinds.length === 2 ? '두' : kinds.length}</span> 종류의 원자 → {good}
         </div>
       )}
