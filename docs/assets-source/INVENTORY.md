@@ -5,6 +5,7 @@
 
 - 경로는 `public/assets/` 기준, 코드에서는 `/assets/<경로>`. 표시 크기는 CSS px(무대 1280×800).
 - **투명 여백**: 잘라낸 그림의 하단(약 6~10%)에는 부드러운 바닥 그림자가 포함돼 있다(투명 그라데이션). 구·카드·타일은 그림 크기 = 물체 + 그림자이므로, 물체를 표시 크기에 맞추려면 `<img>`를 표시 크기의 약 1.06배로 두고 `object-position: top`/하단 그림자만 겹치게 한다. 코드의 그림자(`blur` 검은 타원)는 **그림 그림자로 대체되므로 제거**한다.
+- **그림자 보정(2단계)**: 실제로는 바닥 그림자가 밝은 불투명 픽셀로 남아 있었다 → `python3 scripts/fix_shadow.py <webp...>`로 반투명 검정 그림자로 바꿨다(ui/*, items/slot_socket*·tile_*, fx/nucleus). 구 그림(atom_*·proton·neutron·electron)은 파일 그대로, 오버레이의 `Sphere`가 원으로 잘라 쓴다. 새로 잘라낸 그림에도 적용할 것.
 - 시트 원본: `docs/assets-source/<분류>/*.png`, 스타일 머리말 `docs/assets-source/style.txt`, 잘라내기 `scripts/slice_sheet.py`(TIGHT=1은 가로세로 비 유지).
 - Phaser 텍스처 키가 있는 것만 `game/systems/render.ts`의 `ART`에 등록됐고 `manifest.json`에 전 파일이 적혀 있다(오버레이용 파일은 Phaser가 무시). 오버레이에서는 `<img src="/assets/...">`(가로세로 비는 아래 "px 크기" 열)로 쓴다.
 
