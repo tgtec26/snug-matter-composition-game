@@ -30,7 +30,7 @@ export class WorkshopScene extends Phaser.Scene {
     const sync = () => {
       const { phase } = useGameStore.getState();
       board.setVisible(phase === 'orders');
-      people.setVisible(!['intro', 'accept', 'result'].includes(phase));   // DialogBox를 쓰는 phase
+      people.setVisible(!['intro', 'accept', 'result', 'quiz'].includes(phase));   // DialogBox를 쓰는 phase + 퀴즈(문제판 위 견습생 그림과 겹침)
     };
     sync();
     const unsub = useGameStore.subscribe(sync);

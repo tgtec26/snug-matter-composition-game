@@ -2,6 +2,7 @@
 
 import { useDataStore } from '@/game/dataStore';
 import { Burst } from '@/components/overlays/Burst';
+import { Art, artBg } from '@/components/Art';
 
 export type CardKind = 'element' | 'molecule' | 'ion' | 'substance';
 
@@ -45,8 +46,8 @@ export function ParticleCardView({ kind, id, isNew = false, delay = 0 }: { kind:
   return (
     <div className="relative" style={{ animation: `pop 0.5s cubic-bezier(.2,1.4,.4,1) ${delay}ms both` }}>
       {isNew && <Burst />}
-      <div className={`rounded-2xl border-4 bg-amber-50 text-slate-900 px-6 py-5 ${parts ? 'w-[400px]' : 'w-[260px]'} ${isNew ? 'border-amber-400' : 'border-amber-200'}`}
-        style={{ boxShadow: isNew ? '0 0 36px rgba(252,211,77,.7)' : '0 6px 0 rgba(0,0,0,.35)' }}>
+      <div className={`text-slate-900 px-10 pt-7 pb-10 ${parts ? 'w-[420px]' : 'w-[280px]'}`}
+        style={{ ...artBg('ui/card_front'), filter: isNew ? 'drop-shadow(0 0 18px rgba(252,211,77,.8))' : undefined }}>
         <div className="flex items-baseline justify-between gap-3 mb-3 border-b-2 border-slate-300 pb-2">
           <span className="text-[30px] font-black">{title}</span>
           {sub && <span className="text-[30px] font-black text-sky-700">{sub}</span>}
@@ -61,7 +62,12 @@ export function ParticleCardView({ kind, id, isNew = false, delay = 0 }: { kind:
             ))}
           </div>
         )}
-        {isNew && <div className="absolute -top-4 -right-4 rounded-full bg-amber-400 text-black text-[16px] font-black px-3 py-1 rotate-6">새 카드</div>}
+        {isNew && (
+          <div className="absolute -top-5 -right-6 w-[110px] h-[53px] rotate-6 flex items-center justify-center pb-3 text-white text-[16px] font-black" style={{ textShadow: '0 1px 2px #7f1d1d' }}>
+            <Art src="ui/ribbon" className="absolute inset-0 w-full h-full" />
+            <span className="relative">새 카드</span>
+          </div>
+        )}
       </div>
     </div>
   );

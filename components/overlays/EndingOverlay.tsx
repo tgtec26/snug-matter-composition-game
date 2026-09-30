@@ -6,6 +6,7 @@ import { useDataStore } from '@/game/dataStore';
 import { playSfx } from '@/game/audio';
 import { useLock } from '@/components/hooks/useLock';
 import { Burst } from '@/components/overlays/Burst';
+import { Art, artBg, artFrame } from '@/components/Art';
 
 const ROW_START = 900, ROW_GAP = 380, BOOM_AT = 3400, END_AT = 6200;
 
@@ -59,13 +60,13 @@ export function EndingOverlay() {
           <div key={s.id} className="flex items-center gap-6 w-[900px] justify-center" style={{ animation: `pop .5s cubic-bezier(.2,1.4,.4,1) ${ROW_START + i * ROW_GAP}ms both` }}>
             <div className="flex gap-2 w-[300px] justify-end flex-wrap">
               {s.components.map(c => (
-                <span key={c} className="w-11 h-11 rounded-full bg-sky-400 text-slate-900 font-black text-[17px] flex items-center justify-center" style={{ boxShadow: 'inset -4px -4px 0 rgba(0,0,0,.2)' }}>{sym(c)}</span>
+                <span key={c} className="w-11 h-11 text-slate-900 font-black text-[17px] flex items-center justify-center" style={artBg('ui/cell_bright')}>{sym(c)}</span>
               ))}
             </div>
             <span className="text-amber-300 text-[28px]">→</span>
             <span className="w-[170px] text-center text-white/80 text-[20px] font-bold">{s.particle}</span>
             <span className="text-amber-300 text-[28px]">→</span>
-            <span className="w-[180px] rounded-xl bg-amber-100 text-slate-900 text-[22px] font-black text-center py-1.5">{s.name}</span>
+            <span className="w-[180px] text-slate-900 text-[22px] font-black text-center py-1.5" style={artFrame('ui/panel_paper', 40, 12)}>{s.name}</span>
           </div>
         ))}
       </div>
@@ -76,7 +77,7 @@ export function EndingOverlay() {
         <div className="absolute left-1/4 top-[55%] pointer-events-none"><Burst count={20} radius={260} /></div>
         <div className="absolute right-1/4 top-[55%] pointer-events-none"><Burst count={20} radius={260} /></div>
         <div className="absolute inset-x-0 bottom-[70px] flex justify-center items-center gap-4 pointer-events-none" style={{ animation: 'pop .6s both' }}>
-          <span className="text-amber-300 text-[40px] font-black">별</span>
+          <Art src="ui/star" style={{ width: 84, height: 82 }} />
           <span className="text-amber-300 text-[88px] font-black leading-none tabular-nums">{count}</span>
         </div>
       </>)}

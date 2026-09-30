@@ -7,6 +7,7 @@ import { useDataStore } from '@/game/dataStore';
 import { loadDex } from '@/game/dex';
 import { useLock } from '@/components/hooks/useLock';
 import { Burst } from '@/components/overlays/Burst';
+import { Art, artBg, artFrame } from '@/components/Art';
 
 const fmt = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}분 ${String(s % 60).padStart(2, '0')}초`; };
 
@@ -37,7 +38,11 @@ export function SummaryOverlay() {
     if (!card.current || saving) return;
     setSaving(true); setErr('');
     try {
-      const url = await toPng(card.current, { pixelRatio: 2, backgroundColor: '#fffbeb' });
+      // html-to-image는 border-image 그림을 PNG에 넣지 못한다 → 같은 그림을 data URL로 바꿔 끼운다(보이는 모습은 같음)
+      const frame = await fetch('/assets/ui/panel_paper.webp').then(r => r.blob())
+        .then(b => new Promise<string>(ok => { const f = new FileReader(); f.onload = () => ok(f.result as string); f.readAsDataURL(b); }));
+      card.current.style.borderImageSource = `url(${frame})`;
+      const url = await toPng(card.current, { pixelRatio: 2 });
       const a = document.createElement('a');
       a.href = url; a.download = `입자-결과-${s.nickname || '견습 공작사'}.png`;
       document.body.appendChild(a); a.click(); a.remove();
@@ -45,19 +50,22 @@ export function SummaryOverlay() {
     setSaving(false);
   };
 
-  const btn = 'h-[52px] px-6 rounded-xl text-[20px] font-bold border-2 disabled:opacity-40';
+  const btn = 'h-[56px] px-8 text-[20px] font-bold disabled:opacity-40 disabled:grayscale';
   return (
     <div className="absolute inset-0 bg-black/70 pointer-events-auto flex items-center justify-center">
       <div className="relative" style={{ animation: 'pop .5s cubic-bezier(.2,1.4,.4,1) both' }}>
         <div className="absolute left-1/2 top-[20%] pointer-events-none"><Burst count={24} radius={300} /></div>
-        <div ref={card} className="w-[680px] rounded-3xl border-4 border-amber-400 bg-amber-50 text-slate-900 px-9 py-7">
+        <div ref={card} className="w-[680px] text-slate-900 px-11 py-10" style={artFrame('ui/panel_paper', 60, 34)}>
           <div className="text-[34px] font-black border-b-2 border-slate-300 pb-2 mb-4">{s.nickname || '견습 공작사'}의 입자 공방 결과</div>
           <div className="flex items-center gap-8 mb-4">
-            <div className="text-[64px] font-black text-amber-500 leading-none tabular-nums">별 {s.stars}</div>
+            <div className="flex items-center gap-2 text-[64px] font-black text-amber-500 leading-none tabular-nums" aria-label={`별 ${s.stars}`}>
+              <Art src="ui/star" style={{ width: 64, height: 63 }} />{s.stars}
+            </div>
             <div className="text-[22px] leading-snug">
               <div>걸린 시간 <b>{fmt(s.elapsedMs)}</b></div>
               <div>실수 <b>{s.mistakes}</b>번</div>
             </div>
+            <Art src="npc/apprentice_happy" className="ml-auto -my-6" style={{ width: 130, height: 130 }} />
           </div>
           <div className="mb-4">
             <div className="text-[20px] text-slate-500 mb-1">새로 얻은 카드 {s.newCards.length}장</div>
@@ -76,9 +84,9 @@ export function SummaryOverlay() {
           </div>
         </div>
         <div className="mt-4 flex justify-center gap-3">
-          <button type="button" disabled={locked || saving} onClick={save} className={`${btn} bg-amber-400 border-amber-200 text-black`}>{saving ? '저장 중' : '나의 결과 내려받기'}</button>
-          <button type="button" disabled={locked} onClick={s.restartRun} className={`${btn} bg-sky-500 border-sky-200 text-white`}>다시 하기</button>
-          <button type="button" disabled={locked} onClick={s.reset} className={`${btn} bg-white/15 border-white/40 text-white`}>처음으로</button>
+          <button type="button" disabled={locked || saving} onClick={save} className={`${btn} text-black`} style={artBg('ui/button_amber')}>{saving ? '저장 중' : '나의 결과 내려받기'}</button>
+          <button type="button" disabled={locked} onClick={s.restartRun} className={`${btn} text-slate-900`} style={artBg('ui/button_sky')}>다시 하기</button>
+          <button type="button" disabled={locked} onClick={s.reset} className={`${btn} text-white`} style={artBg('ui/button_navy')}>처음으로</button>
         </div>
         {err && <div className="mt-2 text-center text-[18px] text-red-300">{err}</div>}
       </div>

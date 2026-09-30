@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useGameStore } from '@/game/store';
+import { artBg } from '@/components/Art';
 
 export function TitleOverlay() {
   const phase = useGameStore(s => s.phase);
@@ -22,7 +23,7 @@ export function TitleOverlay() {
       }} className="flex items-center gap-3">
         <input autoFocus value={name} onChange={e => setName(e.target.value)} placeholder="견습생 이름 (2~8자)" maxLength={8}
           className="text-[24px] px-5 py-3 rounded-xl bg-white text-slate-900 w-[320px] outline-none" />
-        <button type="submit" disabled={!ok} className="text-[24px] px-6 py-3 rounded-xl bg-amber-500 text-black font-bold disabled:opacity-40">시작</button>
+        <button type="submit" disabled={!ok} className="text-[24px] w-[150px] h-[58px] text-black font-bold disabled:opacity-40 disabled:grayscale" style={artBg('ui/button_amber')}>시작</button>
       </form>
     </div>
   );

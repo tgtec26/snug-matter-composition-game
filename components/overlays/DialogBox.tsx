@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useLock } from '@/components/hooks/useLock';
+import { Art, artFrame } from '@/components/Art';
 
 interface Props { npcName: string; color: string; lines: string[]; onDone: () => void }
 
@@ -38,9 +39,15 @@ export function DialogBox({ npcName, color, lines, onDone }: Props) {
 
   return (
     <div className="absolute inset-x-0 bottom-0 pointer-events-auto cursor-pointer select-none" onClick={advance}>
-      <div className="mx-6 mb-5 rounded-2xl border border-white/20 bg-black/80 px-7 py-5 flex gap-6 min-h-[170px]">
+      <div className="mx-6 mb-5 px-8 py-7 flex gap-6 min-h-[170px]" style={artFrame('ui/panel_dialog', 40, 22)}>
         <div className="shrink-0 flex flex-col items-center gap-2 w-[120px]">
-          <div className="w-[96px] h-[96px] rounded-full border-4 border-white/70" style={{ background: color }} />
+          {/* 초상: 금테(그림) 안 원에 입자 박사 얼굴 (지금 대사는 모두 박사) */}
+          <div className="relative w-[96px] h-[96px]">
+            <Art src="ui/portrait_frame" className="absolute inset-0 w-full h-full" />
+            <div className="absolute rounded-full overflow-hidden" style={{ inset: 12, background: color }}>
+              <Art src="npc/doctor" className="absolute" style={{ width: 180, height: 180, left: -43, top: -7 }} />
+            </div>
+          </div>
           <div className="text-[16px] text-amber-200 font-bold text-center">{npcName}</div>
         </div>
         <div className="flex-1 text-[24px] leading-relaxed text-white whitespace-pre-wrap">

@@ -7,6 +7,7 @@ import { isOrderOpen } from '@/game/rules';
 import { useLock } from '@/components/hooks/useLock';
 import { useDrag } from '@/components/hooks/useDrag';
 import { playSfx } from '@/game/audio';
+import { Art, artBg } from '@/components/Art';
 import type { Order } from '@/game/types';
 
 const SLOT = { x1: 440, x2: 840, y1: 520, y2: 690 };   // 수락 자리 (드롭 판정, 여유 포함)
@@ -21,16 +22,16 @@ export function OrderBoardOverlay() {
 
 function Card({ o, label, state }: { o: Order; label: string; state: 'open' | 'done' | 'locked' }) {
   return (
-    <div className={`relative h-[300px] rounded-2xl border-4 px-4 py-3 flex flex-col gap-3 ${state === 'done' ? 'border-emerald-400 bg-emerald-950' : 'border-amber-200 bg-amber-50 text-slate-900'} ${state === 'locked' ? 'opacity-40 blur-[2px]' : ''}`}
-      style={{ width: CARD_W, boxShadow: '0 6px 0 rgba(0,0,0,.35)' }}>
-      <div className={`self-start rounded-full px-3 py-0.5 text-[16px] font-black ${state === 'done' ? 'bg-emerald-400 text-emerald-950' : 'bg-amber-500 text-black'}`}>{label}</div>
-      <div className={`text-[24px] font-black leading-tight ${state === 'done' ? 'text-emerald-100' : ''}`}>{o.title}</div>
+    <div className={`relative h-[300px] pl-12 pr-9 pt-9 pb-7 flex flex-col gap-3 text-slate-900 ${state === 'locked' ? 'opacity-40 blur-[2px]' : ''}`}
+      style={{ width: CARD_W, ...artBg(state === 'done' ? 'ui/order_paper_done' : 'ui/order_paper') }}>
+      <div className={`self-start rounded-full px-3 py-0.5 text-[16px] font-black ${state === 'done' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-black'}`}>{label}</div>
+      <div className={`text-[24px] font-black leading-tight ${state === 'done' ? 'text-emerald-900' : ''}`}>{o.title}</div>
       <div className="flex flex-wrap gap-1.5 content-start">
         {o.ingredients.map(sym => (
-          <span key={sym} className={`w-11 h-11 rounded-full flex items-center justify-center text-[18px] font-black border-2 ${state === 'done' ? 'border-emerald-300 text-emerald-100' : 'border-slate-700 bg-white'}`}>{sym}</span>
+          <span key={sym} className="w-11 h-11 flex items-center justify-center text-[18px] font-black text-slate-900" style={artBg('ui/cell_bright')}>{sym}</span>
         ))}
       </div>
-      {state === 'done' && <div className="mt-auto self-end rotate-[-8deg] border-4 border-emerald-300 rounded-lg px-3 py-0.5 text-[22px] font-black text-emerald-300">완료</div>}
+      {state === 'done' && <div className="mt-auto self-end w-[120px] h-[64px] flex items-center justify-center text-[24px] font-black text-emerald-700" style={artBg('ui/stamp_done')}>완료</div>}
     </div>
   );
 }
@@ -38,11 +39,7 @@ function Card({ o, label, state }: { o: Order; label: string; state: 'open' | 'd
 function Lock() {
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 pointer-events-none z-10">
-      <div className="relative w-[64px] h-[76px]">
-        <div className="absolute left-[10px] top-0 w-[44px] h-[40px] rounded-t-full border-[8px] border-b-0 border-slate-200" />
-        <div className="absolute left-0 bottom-0 w-[64px] h-[44px] rounded-lg bg-slate-200 border-4 border-slate-500" />
-        <div className="absolute left-[28px] bottom-[12px] w-2 h-4 rounded bg-slate-600" />
-      </div>
+      <Art src="ui/lock" style={{ width: 64, height: 70 }} />
       <div className="rounded-lg bg-black/70 px-3 py-1 text-[16px] font-bold text-white">주문 1~4 완료 뒤</div>
     </div>
   );
@@ -102,7 +99,7 @@ function Board() {
 
       <div className={`absolute flex flex-col items-center justify-center rounded-3xl border-4 border-dashed transition-all ${over ? 'border-amber-300 bg-amber-300/30 scale-105' : 'border-white/50 bg-white/10'}`}
         style={{ left: SLOT.x1 + 20, top: SLOT.y1 + 20, width: SLOT.x2 - SLOT.x1 - 40, height: SLOT.y2 - SLOT.y1 - 40 }}>
-        <div className="w-0 h-0 border-x-[18px] border-x-transparent border-t-[22px] border-t-amber-300 mb-2" style={{ animation: 'bob 1s ease-in-out infinite' }} />
+        <Art src="ui/arrow_down" className="mb-1" style={{ width: 36, height: 41, animation: 'bob 1s ease-in-out infinite' }} />
         <div className="text-[30px] font-black text-white">수락</div>
       </div>
 
