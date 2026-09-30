@@ -8,6 +8,7 @@ import { playSfx } from '@/game/audio';
 import { useLock } from '@/components/hooks/useLock';
 import { useDrag } from '@/components/hooks/useDrag';
 import { Burst } from '@/components/overlays/Burst';
+import { ElementCardGameOverlay } from '@/components/overlays/ElementCardGameOverlay';
 import type { Step } from '@/game/types';
 
 const CELL = 62, COLS = 18, ROWS = 4, LEFT = 82, TOP = 176;
@@ -23,6 +24,7 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
   const seconds = (useDataStore(s => s.minigame?.table) as { seconds: number } | undefined)?.seconds ?? 30;
   const target = elements.find(e => e.symbol === step.target);
 
+  const [bonus, setBonus] = useState(false);
   const [misses, setMisses] = useState(0);
   const [msg, setMsg] = useState('');
   const [shake, setShake] = useState(0);
@@ -142,9 +144,10 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
         {Array.from({ length: Math.min(misses, 5) }, (_, i) => <span key={i} className="w-4 h-4 rounded-full bg-red-400" />)}
       </div>
 
-      {/* 보너스 놀이 입구 자리: Task 11에서 연결 (지금은 비활성) */}
-      <button type="button" disabled aria-label="보너스 놀이" className="absolute rounded-xl border-2 border-dashed border-white/25 bg-white/5"
-        style={{ left: 1150, top: 500, width: 76, height: 104, opacity: 0.4 }} />
+      {/* 보너스 놀이 입구 (5-5) */}
+      <button type="button" aria-label="보너스 놀이" onClick={e => { setBonus(true); e.currentTarget.blur(); }} className="absolute pointer-events-auto rounded-xl border-4 border-amber-300 bg-indigo-500/80 text-amber-200 text-[40px] font-black"
+        style={{ left: 1150, top: 500, width: 76, height: 104, animation: 'bob 1.4s infinite' }}>?</button>
+      {bonus && <ElementCardGameOverlay onClose={() => setBonus(false)} />}
 
       <div className="absolute rounded-full bg-white/15 overflow-hidden" style={{ left: 340, top: 680, width: 600, height: 14 }}>
         <div className={`h-full rounded-full ${left < 0.2 ? 'bg-red-400' : 'bg-emerald-400'}`} style={{ width: `${left * 100}%`, transition: 'width .2s linear' }} />

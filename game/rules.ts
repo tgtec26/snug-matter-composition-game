@@ -112,3 +112,10 @@ export function latticeConflictCells(grid: (string | null)[][]): string[] {
   }));
   return [...out];
 }
+
+/** 5-5 원소 카드 놀이: 말이 놓인 이름 카드(pos)와 뒤집은 기호 카드(flipped)가 같으면 일치 — 한 칸 이동은 말을 옮기는 조작으로 이어진다 */
+export const cardMatch = (pos: number, flipped: number) => pos === flipped;
+export const nextPos = (pos: number, n: number) => (pos + 1) % n;
+
+/** 카드 놀이 보너스 별: 틀린 뒤집기 4회 이하 3, 8회 이하 2, 그보다 많으면 1 */
+export const cardGameStars = (wrongFlips: number) => (wrongFlips <= 4 ? 3 : wrongFlips <= 8 ? 2 : 1);
