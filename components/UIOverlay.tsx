@@ -10,6 +10,7 @@ import { OrderBoardOverlay } from '@/components/overlays/OrderBoardOverlay';
 import { AcceptOverlay } from '@/components/overlays/AcceptOverlay';
 import { ResultOverlay } from '@/components/overlays/ResultOverlay';
 import { QuizOverlay } from '@/components/overlays/QuizOverlay';
+import { RoomRouter } from '@/components/overlays/RoomRouter';
 import { DevSkip } from '@/components/DevSkip';
 import { useGameStore } from '@/game/store';
 import type { Phase } from '@/game/types';
@@ -26,7 +27,7 @@ export const OVERLAYS: Record<Phase, ComponentType> = {
   intro: IntroOverlay,
   orders: OrderBoardOverlay,
   accept: AcceptOverlay,
-  room: todo('방'),
+  room: RoomRouter,
   classify: todo('원소·화합물 분류'),
   result: ResultOverlay,
   quiz: QuizOverlay,

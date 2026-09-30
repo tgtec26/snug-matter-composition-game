@@ -3,6 +3,7 @@
 import { useGameStore } from '@/game/store';
 import { useDataStore } from '@/game/dataStore';
 import { classify } from '@/game/rules';
+import { ROOMS } from '@/components/overlays/RoomRouter';
 
 export function skipRoom() {
   const s = useGameStore.getState();
@@ -17,7 +18,8 @@ export function skipClassify() {
 
 export function DevSkip() {
   const phase = useGameStore(s => s.phase);
-  if (process.env.NODE_ENV === 'production' || (phase !== 'room' && phase !== 'classify')) return null;
+  const hasRoom = useGameStore(s => !!ROOMS[s.queue[s.stepIdx]?.room]);   // 실제 오버레이가 있는 방에는 통과 버튼을 띄우지 않는다
+  if (process.env.NODE_ENV === 'production' || (phase !== 'room' && phase !== 'classify') || (phase === 'room' && hasRoom)) return null;
   return (
     <button type="button" onClick={phase === 'room' ? skipRoom : skipClassify}
       className="absolute left-1/2 top-[60%] -translate-x-1/2 pointer-events-auto px-6 py-3 rounded-xl bg-white/20 border border-white/50 text-white text-[20px]">

@@ -86,3 +86,7 @@ const registered = (s: Step, dex: Dex) => {
 export const pendingSteps = (o: Order, dex: Dex): Step[] => o.steps.filter(s => !registered(s, dex));
 export const orderDone = (o: Order, dex: Dex) => pendingSteps(o, dex).length === 0;
 export const isOrderOpen = (o: Order, doneOrders: string[]) => (o.unlockedAfter ?? []).every(id => doneOrders.includes(id));
+
+/** 원자 조립기 별점: 3개에서 넣었다 뺀 횟수 2회 이상·시간 초과·실패 경험마다 1개씩 감점 (최소 1) */
+export const atomStars = (wobble: number, overTime: boolean, fails: number) =>
+  Math.max(1, 3 - (wobble > 1 ? 1 : 0) - (overTime ? 1 : 0) - (fails > 0 ? 1 : 0));
