@@ -195,3 +195,9 @@ it('보너스 놀이 별은 한 판에 한 번만 더하고, 다시 하기·처�
   S().restartRun(); expect(S().bonusStarTaken).toBe(false);
   useGameStore.setState({ bonusStarTaken: true }); S().reset(); expect(S().bonusStarTaken).toBe(false);
 });
+
+it('저장본에 같은 새 카드가 중복돼 있어도 불러올 때 한 번만 남는다 (요약 목록 key 중복 오류)', () => {
+  const merge = useGameStore.persist.getOptions().merge!;
+  const merged = merge({ newCards: ['H', 'C', 'H', 'Mg', 'Mg'] }, useGameStore.getState()) as { newCards: string[] };
+  expect(merged.newCards).toEqual(['H', 'C', 'Mg']);
+});

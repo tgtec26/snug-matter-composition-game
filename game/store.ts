@@ -83,4 +83,8 @@ export const useGameStore = create<GameState & Actions>()(persist((set, get) => 
   }),
   restartRun: () => set(s => ({ ...fresh(), nickname: s.nickname, phase: 'intro', startedAt: Date.now(), tutorialDone: true })),
   reset: () => set(fresh()),
-}), { name: 'particle-run-v1', version: 1, storage: createJSONStorage(() => localStorage) }));
+}), {
+  name: 'particle-run-v1', version: 1, storage: createJSONStorage(() => localStorage),
+  // 중복 수정 전 저장본에 같은 카드가 두 번 들어 있을 수 있다 → 불러올 때 한 번만 남긴다 (목록 key 중복 오류)
+  merge: (saved, cur) => { const p = saved as Partial<GameState> | undefined; return { ...cur, ...p, newCards: [...new Set(p?.newCards ?? cur.newCards)] }; },
+}));
