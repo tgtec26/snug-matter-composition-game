@@ -42,6 +42,8 @@ const ART: Record<string, string> = {
   'bg/room_molecule.webp': 'room_molecule_bg',
   'bg/room_ion.webp': 'room_ion_bg',
   'npc/apprentice.webp': 'npc_apprentice',
+  'npc/apprentice_boy.webp': 'npc_apprentice_boy',
+  'npc/apprentice_girl2.webp': 'npc_apprentice_girl2',
   'npc/apprentice_happy.webp': 'npc_apprentice_happy',
   'npc/apprentice_think.webp': 'npc_apprentice_think',
   'npc/doctor.webp': 'npc_doctor',

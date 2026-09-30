@@ -4,9 +4,10 @@ import type { Phase, Step } from '@/game/types';
 import { classify as classifyAtoms, isOrderOpen, pendingSteps } from '@/game/rules';
 import { addToDex, loadDex } from '@/game/dex';
 import { useDataStore } from '@/game/dataStore';
+import type { CharacterId } from '@/game/characters';
 
 export interface GameState {
-  nickname: string; phase: Phase;
+  nickname: string; character: CharacterId; phase: Phase;
   orderId: string | null; queue: Step[]; stepIdx: number;
   doneOrders: string[]; stars: number; mistakes: number;
   newCards: string[]; startedAt: number | null; elapsedMs: number;
@@ -15,7 +16,7 @@ export interface GameState {
 }
 export interface RoomResult { room: Step['room']; target: string; stars: number; extra?: string[]; misses?: number; bonus?: number }
 interface Actions {
-  start: (nickname: string) => void;
+  start: (nickname: string, character?: CharacterId) => void;
   next: () => void;
   acceptOrder: (id: string) => void;
   completeRoom: (r: RoomResult) => void;
@@ -25,7 +26,7 @@ interface Actions {
   reset: () => void;
 }
 const fresh = (): GameState => ({
-  nickname: '', phase: 'title', orderId: null, queue: [], stepIdx: 0, doneOrders: [], stars: 0, mistakes: 0,
+  nickname: '', character: 'girl1', phase: 'title', orderId: null, queue: [], stepIdx: 0, doneOrders: [], stars: 0, mistakes: 0,
   newCards: [], startedAt: null, elapsedMs: 0, tutorialDone: false, classifyMissed: false, bonusStarTaken: false,
 });
 const KIND = { atom: 'elements', table: 'placed', molecule: 'molecules', ion: 'ions' } as const;
@@ -39,7 +40,7 @@ const afterRoom = (queue: Step[], idx: number): Phase => (idx < queue.length ? '
 
 export const useGameStore = create<GameState & Actions>()(persist((set, get) => ({
   ...fresh(),
-  start: (nickname) => set({ ...fresh(), nickname, phase: 'intro', startedAt: Date.now(), tutorialDone: get().tutorialDone }),
+  start: (nickname, character = 'girl1') => set({ ...fresh(), nickname, character, phase: 'intro', startedAt: Date.now(), tutorialDone: get().tutorialDone }),
   next: () => set(s => {
     if (s.phase === 'intro') return s.tutorialDone ? { phase: 'orders' } : { phase: 'accept', orderId: 'o0' };
     if (s.phase === 'result') return { phase: 'quiz' };
@@ -81,7 +82,7 @@ export const useGameStore = create<GameState & Actions>()(persist((set, get) => 
     if (finished) return { doneOrders, stars, phase: 'ending' as Phase, elapsedMs: s.startedAt ? Date.now() - s.startedAt : 0 };
     return { doneOrders, stars, phase: 'orders' as Phase, orderId: null, tutorialDone: true };
   }),
-  restartRun: () => set(s => ({ ...fresh(), nickname: s.nickname, phase: 'intro', startedAt: Date.now(), tutorialDone: true })),
+  restartRun: () => set(s => ({ ...fresh(), nickname: s.nickname, character: s.character, phase: 'intro', startedAt: Date.now(), tutorialDone: true })),
   reset: () => set(fresh()),
 }), {
   name: 'particle-run-v1', version: 1, storage: createJSONStorage(() => localStorage),

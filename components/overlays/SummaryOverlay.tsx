@@ -8,12 +8,14 @@ import { loadDex } from '@/game/dex';
 import { useLock } from '@/components/hooks/useLock';
 import { Burst } from '@/components/overlays/Burst';
 import { Art, artBg, artFrame } from '@/components/Art';
+import { characterStem } from '@/game/characters';
 
 const fmt = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}분 ${String(s % 60).padStart(2, '0')}초`; };
 
 /** 요약 결과 팝업: 별·새 카드·도감·시간을 결과 카드(PNG로 저장 가능)에 모은다. */
 export function SummaryOverlay() {
   const s = useGameStore();
+  const character = s.character;
   const elements = useDataStore(d => d.elements);
   const molecules = useDataStore(d => d.molecules);
   const ions = useDataStore(d => d.ions);
@@ -65,7 +67,7 @@ export function SummaryOverlay() {
               <div>걸린 시간 <b>{fmt(s.elapsedMs)}</b></div>
               <div>실수 <b>{s.mistakes}</b>번</div>
             </div>
-            <Art src="npc/apprentice_happy" className="ml-auto -my-6" style={{ width: 130, height: 130 }} />
+            <Art src={`npc/${characterStem(character)}_happy`} className="ml-auto -my-6" style={{ width: 130, height: 130 }} />
           </div>
           <div className="mb-4">
             <div className="text-[20px] text-slate-500 mb-1">새로 얻은 카드 {s.newCards.length}장</div>

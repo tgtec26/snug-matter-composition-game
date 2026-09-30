@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { addBg, addImgH, hiDpi, isArt, TEXT } from '@/game/systems/render';
 import { attachRouter } from '@/game/systems/sceneRouter';
 import { useGameStore } from '@/game/store';
+import { characterStem } from '@/game/characters';
 
 /** 공작소 배경 (주문판·수락 대사 등 방 밖 화면). 그림은 workshop_bg 텍스처가 생기면 자동 교체. */
 export class WorkshopScene extends Phaser.Scene {
@@ -21,8 +22,9 @@ export class WorkshopScene extends Phaser.Scene {
     // 작업대와 인물 (플레이스홀더: 색 원 + 이름). 대사창이 뜨는 동안에는 초상과 겹치지 않게 숨긴다.
     if (!art) this.add.rectangle(640, 760, 1280, 80, 0x4a3b2a);
     const people = this.add.container(0, 0);
-    people.add(this.textures.exists('npc_apprentice') ? addImgH(this, 150, 640, 'npc_apprentice', 180)
-      : this.add.circle(150, 690, 44, 0x60a5fa).setStrokeStyle(4, 0xffffff));
+    const appKey = () => `npc_${characterStem(useGameStore.getState().character)}`;   // 고른 견습생 그림
+    const apprentice = this.textures.exists(appKey()) ? addImgH(this, 150, 640, appKey(), 180) : null;
+    people.add(apprentice ?? this.add.circle(150, 690, 44, 0x60a5fa).setStrokeStyle(4, 0xffffff));
     people.add(this.add.text(150, 750, '견습생', { ...TEXT, fontSize: '18px', color: '#fff' }).setOrigin(0.5));
     people.add(this.textures.exists('npc_doctor') ? addImgH(this, 1130, 640, 'npc_doctor', 180)
       : this.add.circle(1130, 690, 44, 0xe9c46a).setStrokeStyle(4, 0xffffff));
@@ -30,7 +32,8 @@ export class WorkshopScene extends Phaser.Scene {
     const sync = () => {
       const { phase } = useGameStore.getState();
       board.setVisible(phase === 'orders');
-      people.setVisible(!['intro', 'accept', 'result', 'quiz'].includes(phase));   // DialogBox를 쓰는 phase + 퀴즈(문제판 위 견습생 그림과 겹침)
+      if (apprentice && this.textures.exists(appKey())) apprentice.setTexture(appKey());
+      people.setVisible(!['title', 'intro', 'accept', 'result', 'quiz'].includes(phase));   // DialogBox를 쓰는 phase + 퀴즈(문제판 위 견습생 그림과 겹침)
     };
     sync();
     const unsub = useGameStore.subscribe(sync);

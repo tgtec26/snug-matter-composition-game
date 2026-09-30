@@ -7,6 +7,7 @@ import { useLock } from '@/components/hooks/useLock';
 import { playSfx } from '@/game/audio';
 import { Burst } from '@/components/overlays/Burst';
 import { Art, artFrame } from '@/components/Art';
+import { characterStem } from '@/game/characters';
 
 export function QuizOverlay() {
   const phase = useGameStore(s => s.phase);
@@ -16,6 +17,7 @@ export function QuizOverlay() {
 }
 
 function QuizFlow({ orderId }: { orderId: string }) {
+  const character = useGameStore(s => s.character);
   const finishQuiz = useGameStore(s => s.finishQuiz);
   const pool = useDataStore(s => s.quiz);
   const [q] = useState(() => {
@@ -55,7 +57,7 @@ function QuizFlow({ orderId }: { orderId: string }) {
       <div className="relative w-[860px] px-10 py-9"
         style={{ ...artFrame('ui/panel_glass', 60, 26), animation: shake ? 'shake 0.4s' : undefined, filter: right ? 'drop-shadow(0 0 14px rgba(52,211,153,.8))' : undefined }}>
         {/* 견습생이 문제판 위로 고개를 내민다: 푸는 동안 고민, 맞히면 기쁨 */}
-        <Art src={right ? 'npc/apprentice_happy' : 'npc/apprentice_think'} className="absolute" style={{ right: 40, top: -122, width: 140, height: 140 }} />
+        <Art src={`npc/${characterStem(character)}${right ? '_happy' : '_think'}`} className="absolute" style={{ right: 40, top: -122, width: 140, height: 140 }} />
         {right && (
           <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
             <Burst count={20} radius={260} />
