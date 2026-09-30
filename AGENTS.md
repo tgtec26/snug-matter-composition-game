@@ -3,7 +3,7 @@
 > AI 코딩 에이전트가 이 저장소에서 작업할 때 따라야 할 지침. 상위 `../../AGENTS.md`(워크스페이스 공통 규칙)가 있으면 병합해 적용한다.
 
 ## 현재 상태 (2026-09-30)
-뼈대 + 승인된 설계 스펙. **계획서는 아직 없다.** `docs/superpowers/plans/<날짜>-matter-composition-mvp.md`를 스펙 9장 기준으로 만든 뒤 태스크별로 구현한다 (superpowers:writing-plans → subagent-driven-development).
+MVP 구현 완료 (계획서 `docs/superpowers/plans/2026-09-30-matter-composition-mvp.md` Task 1~13 완료, 1280×800 완주 QA 끝). 그림은 플레이스홀더 — 교체 목록은 `docs/art-todo.md`. 남은 일은 PROGRESS.md 끝 절.
 
 ## 작업을 이어받으면
 1. [PROGRESS.md](PROGRESS.md)에서 완료 항목·다음 단계 확인.
