@@ -51,7 +51,8 @@
 ## 2026-09-30 전역 개발 지침 대조
 - `tgtec26/snug-game-principles`(커밋 0f09d04) 기준 사후 점검: `docs/principles-check.md`(점검표 14개 항목 + 교과서 원문 위치), 회고 조사 `docs/reference-games.md`. AGENTS.md에 지침 링크 추가.
 - 코드는 바꾸지 않았다. `pnpm test`(72)·typecheck·lint 통과. 브라우저 플레이는 하지 않았다.
-- 지침 기준 남은 일: 효과음 제작(놓기·빼기·문 열기·피날레 — 기존 "남은 일 2"와 같음), 음량과 배치 좌표의 어드민화 여부 결정, 퀴즈 비중 축소 검토, 크롬북 실기, 교과서 원문 `docs/textbook/` 위치 결정(사용자).
+- 지침 기준 남은 일: 효과음 제작(놓기·빼기·문 열기·피날레 — 기존 "남은 일 2"와 같음), 음량과 배치 좌표의 어드민화 여부 결정, 퀴즈 비중 축소 검토, 크롬북 실기.
+- 교과서 원문 위치는 결정됨(2026-09-30): 저장소에 커밋하지 않고 구글 드라이브에만 둔다. 발췌·정리본과 쪽수 인용만 쓴다.
 ## 2026-09-30 그림 교체 2단계 — React 오버레이 CSS 도형 → 그림
 - **공용**: `components/Art.tsx` — `Art`(img, draggable=false·pointer-events-none·로드 실패 시 숨김), `Sphere`(구 그림을 원으로 잘라 지름에 맞춤 + 코드 그림자, 집으면 그림자 멀어짐), `artBg`(늘려 까는 background), `artFrame`(border-image 9조각), `NUCLEUS_ART`. 글자·기호·숫자는 모두 코드가 그림 위에 얹는다.
 - **그림 수정**: 1단계에서 잘라낸 그림의 바닥 그림자가 투명 그라데이션이 아니라 **밝은 불투명 픽셀**이라 어두운 방에서 흰 얼룩으로 보였다 → `scripts/fix_shadow.py`(투명 영역에서 이어진 밝고 채도 낮은 픽셀만 반투명 검정 그림자로)를 ui/* 전부, items/slot_socket*·tile_*, fx/nucleus에 적용. 구(atom_*·proton·neutron·electron)는 은회색 구(H·중성자)가 그림자와 구분되지 않아 파일은 두고 `Sphere`가 원으로 잘라 쓴다.
