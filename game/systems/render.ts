@@ -1,0 +1,30 @@
+import type * as Phaser from 'phaser';
+import { GAME_WIDTH, GAME_HEIGHT, DPR } from '@/game/config';
+
+export { DPR };
+export const TEXT = { fontFamily: 'Pretendard, "Apple SD Gothic Neo", system-ui, sans-serif', resolution: DPR };
+/** 밝은 배경 위에서도 읽히는 글자 테두리 */
+export const OUTLINE = { stroke: '#000', strokeThickness: 4 } as const;
+
+/** 씬 create() 첫 줄에서 호출: 카메라를 DPR배 줌해 월드 좌표는 1280×800 그대로 유지 */
+export function hiDpi(scene: Phaser.Scene) {
+  scene.cameras.main.setZoom(DPR);
+  scene.cameras.main.centerOn(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+}
+/** 텍스처 원본 크기와 무관하게 표시 크기 고정 (그림은 표시 크기의 2배 해상도 권장) */
+export function addImg(scene: Phaser.Scene, x: number, y: number, key: string, w: number, h: number) {
+  return scene.add.image(x, y, key).setDisplaySize(w, h);
+}
+/** 높이만 지정, 가로는 원본 비율 (캐릭터 그림용) */
+export function addImgH(scene: Phaser.Scene, x: number, y: number, key: string, h: number) {
+  const img = scene.add.image(x, y, key);
+  return img.setScale(h / img.height);
+}
+/** 전체 화면 배경: 그림이 있으면 그림, 없으면 단색 */
+export function addBg(scene: Phaser.Scene, key: string, color: number) {
+  return scene.textures.exists(key)
+    ? scene.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2, key).setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
+    : scene.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, color);
+}
+/** 텍스처가 실제 그림 파일인지 (플레이스홀더는 캔버스로 생성됨) */
+export const isArt = (scene: Phaser.Scene, key: string) => scene.textures.get(key).getSourceImage() instanceof HTMLImageElement;
