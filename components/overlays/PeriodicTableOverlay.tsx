@@ -19,6 +19,7 @@ const cellAt = (x: number, y: number) => {
 /** 5-2 주기율표 광장: 원소 카드를 표의 칸으로 끌어다 놓는다. 판정은 rules.placeInTable. */
 export function PeriodicTableOverlay({ step }: { step: Step }) {
   const completeRoom = useGameStore(s => s.completeRoom);
+  const bonusStarTaken = useGameStore(s => s.bonusStarTaken);
   const elements = useDataStore(s => s.elements);
   const hints = useDataStore(s => s.dialog?.hints);
   const seconds = (useDataStore(s => s.minigame?.table) as { seconds: number } | undefined)?.seconds ?? 30;
@@ -63,8 +64,8 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
     setDone(c);
     setMsg(target.symbol === 'H' ? '금속과는 성질이 달라' : '');
     if ((target.group === 1 && target.symbol !== 'H') || target.group === 18) window.dispatchEvent(new CustomEvent('room-fx', { detail: { symbol: target.symbol, group: target.group } }));
-    const stars = tableStars(misses, (Date.now() - t0) / 1000 > seconds) + bonusStars;
-    setTimeout(() => completeRoom({ room: 'table', target: target.symbol, stars, misses }), 2600);
+    const stars = tableStars(misses, (Date.now() - t0) / 1000 > seconds);
+    setTimeout(() => completeRoom({ room: 'table', target: target.symbol, stars, misses, bonus: bonusStars }), 2600);
   }, [target, locked, elements, hints, misses, t0, seconds, bonusStars, completeRoom]);
 
   const onDrop = useCallback((_id: string, x: number, y: number) => place(cellAt(x, y)), [place]);
@@ -151,8 +152,8 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
         {Array.from({ length: Math.min(misses, 5) }, (_, i) => <span key={i} className="w-4 h-4 rounded-full bg-red-400" />)}
       </div>
 
-      {/* 보너스 놀이 입구 (5-5) */}
-      {!done && <button type="button" aria-label="보너스 놀이" onClick={e => { openBonus(); e.currentTarget.blur(); }} className="absolute pointer-events-auto rounded-xl border-4 border-amber-300 bg-indigo-500/80 text-amber-200 text-[40px] font-black"
+      {/* 보너스 놀이 입구 (5-5): 별을 받은 판에서는 숨긴다 (한 판에 한 번) */}
+      {!done && !bonusStarTaken && <button type="button" aria-label="보너스 놀이" onClick={e => { openBonus(); e.currentTarget.blur(); }} className="absolute pointer-events-auto rounded-xl border-4 border-amber-300 bg-indigo-500/80 text-amber-200 text-[40px] font-black"
         style={{ left: 1150, top: 500, width: 76, height: 104, animation: 'bob 1.4s infinite' }}>?</button>}
       {bonus && <ElementCardGameOverlay onClose={closeBonus} />}
 

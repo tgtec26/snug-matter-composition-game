@@ -11,8 +11,9 @@ export interface GameState {
   doneOrders: string[]; stars: number; mistakes: number;
   newCards: string[]; startedAt: number | null; elapsedMs: number;
   tutorialDone: boolean; classifyMissed: boolean;
+  bonusStarTaken: boolean;   // 보너스 놀이 별은 한 판에 한 번만
 }
-export interface RoomResult { room: Step['room']; target: string; stars: number; extra?: string[]; misses?: number }
+export interface RoomResult { room: Step['room']; target: string; stars: number; extra?: string[]; misses?: number; bonus?: number }
 interface Actions {
   start: (nickname: string) => void;
   next: () => void;
@@ -25,7 +26,7 @@ interface Actions {
 }
 const fresh = (): GameState => ({
   nickname: '', phase: 'title', orderId: null, queue: [], stepIdx: 0, doneOrders: [], stars: 0, mistakes: 0,
-  newCards: [], startedAt: null, elapsedMs: 0, tutorialDone: false, classifyMissed: false,
+  newCards: [], startedAt: null, elapsedMs: 0, tutorialDone: false, classifyMissed: false, bonusStarTaken: false,
 });
 const KIND = { atom: 'elements', table: 'placed', molecule: 'molecules', ion: 'ions' } as const;
 const order = (id: string | null) => useDataStore.getState().orders.find(o => o.id === id);
@@ -60,7 +61,8 @@ export const useGameStore = create<GameState & Actions>()(persist((set, get) => 
     for (const x of r.extra ?? []) if (addToDex('molecules', x)) gained.push(x);   // 보너스: 다른 물질 카드
     const stepIdx = s.stepIdx + 1;
     const newCards = [...new Set([...s.newCards, ...gained])];   // 원자 조립·주기율표 배치는 같은 원소 카드
-    const base = { stepIdx, stars: s.stars + r.stars, mistakes: s.mistakes + (r.misses ?? 0), newCards, classifyMissed: false };
+    const bonus = s.bonusStarTaken ? 0 : r.bonus ?? 0;
+    const base = { stepIdx, stars: s.stars + r.stars + bonus, bonusStarTaken: s.bonusStarTaken || bonus > 0, mistakes: s.mistakes + (r.misses ?? 0), newCards, classifyMissed: false };
     return r.room === 'molecule' ? { ...base, phase: 'classify' as Phase } : { ...base, phase: afterRoom(s.queue, stepIdx) };
   }),
   classify: (answer) => set(s => {

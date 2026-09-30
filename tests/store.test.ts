@@ -182,3 +182,16 @@ it('다른 물질 보너스 카드도 새 카드 목록에 한 번만 (이미 �
   S().completeRoom({ room: 'molecule', target: 'O2', stars: 3, extra: ['H2'] });
   expect(S().newCards).toEqual(['N', 'N2', 'H2', 'O2']);
 });
+it('보너스 놀이 별은 한 판에 한 번만 더하고, 다시 하기·처음으로에서 초기화', () => {
+  S().start('a'); S().next(); S().acceptOrder('o0');   // 튜토리얼: 표 방이 여러 번
+  let tables = 0;
+  while (S().phase === 'room') {
+    const { room, target } = S().queue[S().stepIdx];
+    const before = S().stars;
+    S().completeRoom({ room, target, stars: 0, bonus: room === 'table' ? 2 : undefined });
+    if (room === 'table') expect(S().stars - before).toBe(tables++ === 0 ? 2 : 0);
+  }
+  expect(tables).toBeGreaterThan(1); expect(S().bonusStarTaken).toBe(true);
+  S().restartRun(); expect(S().bonusStarTaken).toBe(false);
+  useGameStore.setState({ bonusStarTaken: true }); S().reset(); expect(S().bonusStarTaken).toBe(false);
+});
