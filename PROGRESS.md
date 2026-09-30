@@ -47,3 +47,8 @@
 - **대사 화면 겹침**: intro·accept·result(대사창 phase)에는 공작소 인물 플레이스홀더를 숨긴다.
 - **보너스 놀이 별**: 한 판에 한 번만(`store.bonusStarTaken`, persist, restartRun/reset에서 초기화). 받은 뒤에는 주기율표의 놀이 입구를 숨긴다.
 - 확인: `pnpm test`(72) · typecheck · lint · build 통과. 1280×800 인앱 브라우저에서 주기율표 오배치/정배치(드래그), 격자 충돌 후 이온 별 +2, 요약 팝업 실수 3번·새 카드 O₂ 포함, 대사 화면 인물 숨김, manifest 빈 목록일 때 4xx 요청 0건, 임시 그림을 manifest에 넣었을 때 공작소·원자 방·주기율표 방 배경 교체를 확인(임시 그림은 삭제).
+
+## 2026-09-30 전역 개발 지침 대조
+- `tgtec26/snug-game-principles`(커밋 0f09d04) 기준 사후 점검: `docs/principles-check.md`(점검표 14개 항목 + 교과서 원문 위치), 회고 조사 `docs/reference-games.md`. AGENTS.md에 지침 링크 추가.
+- 코드는 바꾸지 않았다. `pnpm test`(72)·typecheck·lint 통과. 브라우저 플레이는 하지 않았다.
+- 지침 기준 남은 일: 효과음 제작(놓기·빼기·문 열기·피날레 — 기존 "남은 일 2"와 같음), 음량과 배치 좌표의 어드민화 여부 결정, 퀴즈 비중 축소 검토, 크롬북 실기, 교과서 원문 `docs/textbook/` 위치 결정(사용자).
