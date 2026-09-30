@@ -1,0 +1,26 @@
+{
+  "atom": {
+    "seconds": 45,
+    "dropRadius": 70,
+    "slotCount": 20
+  },
+  "table": {
+    "seconds": 30,
+    "cell": {
+      "w": 52,
+      "h": 52
+    }
+  },
+  "molecule": {
+    "seconds": 60,
+    "snap": 56
+  },
+  "ion": {
+    "seconds": 60,
+    "lattice": 4,
+    "dropRadius": 44
+  },
+  "cardGame": {
+    "seconds": 60
+  }
+}

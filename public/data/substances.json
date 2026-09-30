@@ -1,0 +1,104 @@
+[
+  {
+    "id": "water",
+    "name": "물",
+    "components": [
+      "수소",
+      "산소"
+    ],
+    "particle": "분자",
+    "order": "o1"
+  },
+  {
+    "id": "air",
+    "name": "공기",
+    "components": [
+      "질소",
+      "산소",
+      "탄소"
+    ],
+    "particle": "분자",
+    "order": "o2"
+  },
+  {
+    "id": "ozone",
+    "name": "오존",
+    "components": [
+      "산소"
+    ],
+    "particle": "분자",
+    "order": "o3"
+  },
+  {
+    "id": "nacl",
+    "name": "염화 나트륨",
+    "components": [
+      "나트륨",
+      "염소"
+    ],
+    "particle": "이온",
+    "order": "o4"
+  },
+  {
+    "id": "seawater",
+    "name": "바닷물",
+    "components": [
+      "수소",
+      "산소",
+      "나트륨",
+      "염소",
+      "마그네슘"
+    ],
+    "particle": "분자·이온",
+    "order": "o5"
+  },
+  {
+    "id": "can-drink",
+    "name": "캔 음료",
+    "components": [
+      "알루미늄",
+      "수소",
+      "산소",
+      "나트륨",
+      "염소",
+      "탄소"
+    ],
+    "particle": "원자·분자·이온",
+    "order": "o4",
+    "page": 157,
+    "parts": [
+      {
+        "name": "알루미늄 캔",
+        "components": [
+          "알루미늄"
+        ],
+        "particle": "원자"
+      },
+      {
+        "name": "물",
+        "components": [
+          "수소",
+          "산소"
+        ],
+        "particle": "분자"
+      },
+      {
+        "name": "염화 나트륨",
+        "components": [
+          "염소",
+          "나트륨"
+        ],
+        "particle": "이온"
+      },
+      {
+        "name": "과당",
+        "components": [
+          "탄소",
+          "수소",
+          "산소"
+        ],
+        "particle": "분자"
+      }
+    ]
+  }
+]

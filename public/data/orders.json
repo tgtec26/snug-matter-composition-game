@@ -1,0 +1,184 @@
+[
+  {
+    "id": "o0",
+    "title": "수소·탄소·산소부터",
+    "ingredients": [
+      "H",
+      "C",
+      "O"
+    ],
+    "steps": [
+      {
+        "room": "atom",
+        "target": "H"
+      },
+      {
+        "room": "atom",
+        "target": "C"
+      },
+      {
+        "room": "atom",
+        "target": "O"
+      },
+      {
+        "room": "table",
+        "target": "H"
+      },
+      {
+        "room": "table",
+        "target": "C"
+      },
+      {
+        "room": "table",
+        "target": "O"
+      }
+    ],
+    "accept": "먼저 수소, 탄소, 산소 원자를 만들어 보자. 양성자수가 원자의 종류를 정한단다.",
+    "done": "잘했어! 원자 번호는 양성자수와 같고, 주기율표에는 그 번호순으로 놓인단다."
+  },
+  {
+    "id": "o1",
+    "title": "물 한 방울",
+    "ingredients": [
+      "H",
+      "O"
+    ],
+    "steps": [
+      {
+        "room": "molecule",
+        "target": "H2O"
+      }
+    ],
+    "accept": "물 한 방울을 만들어 주게. 수소 원자와 산소 원자가 필요하다네.",
+    "done": "물은 수소와 산소, 두 종류의 원자로 이루어진 화합물이야. 원소가 아니란다."
+  },
+  {
+    "id": "o2",
+    "title": "공기 한 줌",
+    "ingredients": [
+      "N",
+      "O",
+      "C"
+    ],
+    "steps": [
+      {
+        "room": "atom",
+        "target": "N"
+      },
+      {
+        "room": "table",
+        "target": "N"
+      },
+      {
+        "room": "molecule",
+        "target": "N2"
+      },
+      {
+        "room": "molecule",
+        "target": "O2"
+      },
+      {
+        "room": "molecule",
+        "target": "CO2"
+      }
+    ],
+    "accept": "공기 한 줌에는 질소, 산소, 이산화 탄소가 들어 있어. 질소 원자부터 만들어 보게.",
+    "done": "질소와 산소는 한 가지 원자로 된 원소, 이산화 탄소는 두 가지 원자로 된 화합물이지."
+  },
+  {
+    "id": "o3",
+    "title": "오존층",
+    "ingredients": [
+      "O"
+    ],
+    "steps": [
+      {
+        "room": "molecule",
+        "target": "O3"
+      }
+    ],
+    "accept": "산소 원자 3개를 붙여 보게. 무엇이 만들어질까?",
+    "done": "산소가 아니라 오존이야! 원자의 종류가 같아도 개수가 다르면 다른 분자란다."
+  },
+  {
+    "id": "o4",
+    "title": "소금 한 알",
+    "ingredients": [
+      "Na",
+      "Cl"
+    ],
+    "steps": [
+      {
+        "room": "atom",
+        "target": "Na"
+      },
+      {
+        "room": "atom",
+        "target": "Cl"
+      },
+      {
+        "room": "table",
+        "target": "Na"
+      },
+      {
+        "room": "table",
+        "target": "Cl"
+      },
+      {
+        "room": "ion",
+        "target": "Na+"
+      },
+      {
+        "room": "ion",
+        "target": "Cl-"
+      }
+    ],
+    "accept": "소금은 나트륨과 염소로 되어 있어. 그런데 분자가 아니라 이온으로 이루어졌다네.",
+    "done": "염화 나트륨은 나트륨 이온과 염화 이온이 규칙적으로 배열된 물질이란다."
+  },
+  {
+    "id": "o5",
+    "title": "바닷물 한 방울",
+    "ingredients": [
+      "H",
+      "O",
+      "Na",
+      "Cl",
+      "Mg"
+    ],
+    "unlockedAfter": [
+      "o1",
+      "o2",
+      "o3",
+      "o4"
+    ],
+    "steps": [
+      {
+        "room": "atom",
+        "target": "Mg"
+      },
+      {
+        "room": "table",
+        "target": "Mg"
+      },
+      {
+        "room": "molecule",
+        "target": "H2O"
+      },
+      {
+        "room": "ion",
+        "target": "Na+"
+      },
+      {
+        "room": "ion",
+        "target": "Cl-"
+      },
+      {
+        "room": "ion",
+        "target": "Mg2+"
+      }
+    ],
+    "accept": "마지막 주문이야. 바닷물에는 물 분자와 여러 이온이 함께 들어 있단다.",
+    "done": "대단하구나! 바닷물에는 물 분자와 나트륨 이온, 염화 이온, 마그네슘 이온이 있지."
+  }
+]

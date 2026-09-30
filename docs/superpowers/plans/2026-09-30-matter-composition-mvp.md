@@ -212,7 +212,8 @@ describe('canGrow / liveFormula', () => {
     expect(canGrow(d, ['H'])).toBe(true);
     expect(canGrow(d, ['H', 'H'])).toBe(true);
     expect(canGrow(d, ['H', 'H', 'O'])).toBe(true);
-    expect(canGrow(d, ['H', 'H', 'H'])).toBe(false);   // NH₃가 아니라 H 3개만은 불가
+    expect(canGrow(d, ['H', 'H', 'H'])).toBe(true);    // NH₃·CH₄의 중간 단계
+    expect(canGrow(d, ['H', 'H', 'H', 'H', 'H'])).toBe(false);
     expect(canGrow(d, ['N', 'O'])).toBe(false);
   });
   it('화학식 실시간 표기 (1 생략, 오른쪽 아래 숫자)', () => {
