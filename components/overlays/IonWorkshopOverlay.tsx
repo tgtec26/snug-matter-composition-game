@@ -101,7 +101,7 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
 
   if (!targetIon || !atom) return null;
   if (phase === 'lattice') {
-    return <Lattice size={size} hints={hints} onDone={() => completeRoom({ room: 'ion', target: step.target, stars: ionStars(fails) })} />;
+    return <Lattice size={size} hints={hints} onDone={misses => completeRoom({ room: 'ion', target: step.target, stars: ionStars(fails, misses) })} />;
   }
   const hiddenEl = drag?.id.startsWith('el:') ? Number(drag.id.slice(3)) : -1;
   const overOut = drag?.id.startsWith('el:') && dist(drag.x, drag.y, CX, CY) > OUT_R;
@@ -191,7 +191,7 @@ const Tile = ({ v, size = 84, lift = false, bad = false }: { v: string; size?: n
 );
 
 /** 염화 나트륨: Na⁺·Cl⁻ 타일을 격자에 번갈아 놓는다. 판정은 rules.checkLattice. */
-function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string, string>; onDone: () => void }) {
+function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string, string>; onDone: (misses: number) => void }) {
   const [grid, setGrid] = useState<Grid>(() => Array.from({ length: size }, () => Array<string | null>(size).fill(null)));
   const [bad, setBad] = useState<string[]>([]);
   const [msg, setMsg] = useState('');
@@ -201,18 +201,21 @@ function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string,
   const stage = useRef<HTMLDivElement>(null);
   const gRef = useRef(grid);
   const busy = useRef(false);
+  const misses = useRef(0);   // 같은 전하끼리 새로 붙인 횟수 (별점)
 
   const apply = useCallback((next: Grid) => {
+    const before = checkLattice(gRef.current).conflicts;
     gRef.current = next; setGrid(next);
     const res = checkLattice(next), cells = latticeConflictCells(next);
     setBad(cells);
+    if (res.conflicts > before) misses.current++;
     if (res.conflicts > 0) { playSfx('error'); setMsg(hints?.latticeOpposite ?? ''); return; }
     setMsg('');
     if (res.complete) {
       busy.current = true; setDone(true);
       playSfx('correct'); setTimeout(() => playSfx('success'), 350);
       window.dispatchEvent(new CustomEvent('room-fx', { detail: { kind: 'lattice' } }));
-      setTimeout(onDone, 3200);
+      setTimeout(() => onDone(misses.current), 3200);
     } else playSfx('correct');
   }, [hints, onDone]);
   const put = useCallback((r: number, c: number, v: string | null, from?: [number, number]) => {

@@ -101,8 +101,8 @@ export const tableStars = (misses: number, overTime: boolean) =>
 export const moleculeStars = (detaches: number, overTime: boolean) =>
   Math.max(1, 3 - (detaches > 2 ? 2 : detaches > 0 ? 1 : 0) - (overTime ? 1 : 0));
 
-/** 이온 공방 별점: 확인 버튼을 눌러 틀린 횟수 1회 -1, 2회 이상 -2 (최소 1) */
-export const ionStars = (fails: number) => Math.max(1, 3 - Math.min(fails, 2));
+/** 이온 공방 별점: 확인 버튼을 눌러 틀린 횟수 1회 -1, 2회 이상 -2, 격자 오배치가 있으면 -1 (최소 1) */
+export const ionStars = (fails: number, latticeMisses = 0) => Math.max(1, 3 - Math.min(fails, 2) - (latticeMisses > 0 ? 1 : 0));
 
 /** 격자에서 같은 전하 이웃과 붙은 칸들 ("r,c") */
 export function latticeConflictCells(grid: (string | null)[][]): string[] {
