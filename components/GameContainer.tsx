@@ -21,6 +21,7 @@ export function GameContainer() {
         w.__game = game;
         w.__store = (await import('@/game/store')).useGameStore;
         w.__rules = await import('@/game/rules');
+        w.__skipRoom = (await import('@/components/DevSkip')).skipRoom;   // 방 오버레이 완성 전 흐름 확인용
         // 숨겨진 미리보기 창에서도 루프가 돌도록 (Phaser는 visibilitychange=hidden 시 loop.pause)
         game.events.removeAllListeners(Phaser.Core.Events.HIDDEN);
         game.events.on(Phaser.Core.Events.HIDDEN, () => { game.loop.resume(); });

@@ -29,7 +29,7 @@ export type Phase =
   | 'title' | 'intro' | 'orders' | 'accept' | 'room' | 'classify'
   | 'result' | 'quiz' | 'ending' | 'summary';
 
-export interface Substance { id: string; name: string; components: string[]; particle: string; order?: string; parts?: Record<string, unknown>; }
+export interface Substance { id: string; name: string; components: string[]; particle: string; order?: string; parts?: { name: string; components: string[]; particle: string }[]; }
 export interface DialogConfig { intro: string[]; hints: Record<string, string>; }
 export type MinigameConfig = Record<string, Record<string, unknown>>;
 export interface QuizQuestion { id: string; order: string; q: string; choices: string[]; answer: number; page?: number; explain?: string; }

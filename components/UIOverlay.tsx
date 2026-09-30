@@ -6,6 +6,11 @@ import { TopControls } from '@/components/TopControls';
 import { AudioRunner } from '@/components/AudioRunner';
 import { TitleOverlay } from '@/components/overlays/TitleOverlay';
 import { IntroOverlay } from '@/components/overlays/IntroOverlay';
+import { OrderBoardOverlay } from '@/components/overlays/OrderBoardOverlay';
+import { AcceptOverlay } from '@/components/overlays/AcceptOverlay';
+import { ResultOverlay } from '@/components/overlays/ResultOverlay';
+import { QuizOverlay } from '@/components/overlays/QuizOverlay';
+import { DevSkip } from '@/components/DevSkip';
 import { useGameStore } from '@/game/store';
 import type { Phase } from '@/game/types';
 
@@ -19,12 +24,12 @@ const todo = (name: string): ComponentType => function TodoOverlay() { return <T
 export const OVERLAYS: Record<Phase, ComponentType> = {
   title: TitleOverlay,
   intro: IntroOverlay,
-  orders: todo('주문판'),
-  accept: todo('수락 대사'),
+  orders: OrderBoardOverlay,
+  accept: AcceptOverlay,
   room: todo('방'),
   classify: todo('원소·화합물 분류'),
-  result: todo('결과'),
-  quiz: todo('퀴즈'),
+  result: ResultOverlay,
+  quiz: QuizOverlay,
   ending: todo('엔딩'),
   summary: todo('요약'),
 };
@@ -37,6 +42,7 @@ export function UIOverlay() {
     <div className="absolute inset-0 pointer-events-none">
       <HUD />
       <Current />
+      <DevSkip />
       <TopControls />
       <AudioRunner />
     </div>
