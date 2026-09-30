@@ -165,3 +165,20 @@ it('같은 원소를 조립·배치해도 새 카드 목록에는 한 번만 (�
   S().start('a'); S().next(); S().acceptOrder('o0'); playQueue();
   expect(S().newCards).toEqual(['H', 'C', 'O']);
 });
+it('방 오류(misses)는 mistakes에 합산되고 갈림길 오답과도 더해진다', () => {
+  S().start('a'); force('orders'); pick('o2');
+  S().completeRoom({ room: 'atom', target: 'N', stars: 2, misses: 2 });
+  S().completeRoom({ room: 'table', target: 'N', stars: 3, misses: 1 });
+  S().completeRoom({ room: 'molecule', target: 'N2', stars: 3 });
+  S().classify('화합물');
+  expect(S().mistakes).toBe(4);
+});
+it('다른 물질 보너스 카드도 새 카드 목록에 한 번만 (이미 도감에 있으면 제외)', () => {
+  S().start('a'); force('orders'); pick('o2');
+  S().completeRoom({ room: 'atom', target: 'N', stars: 3 });
+  S().completeRoom({ room: 'table', target: 'N', stars: 3 });
+  S().completeRoom({ room: 'molecule', target: 'N2', stars: 3, extra: ['H2', 'O2'] });
+  S().classify('원소');
+  S().completeRoom({ room: 'molecule', target: 'O2', stars: 3, extra: ['H2'] });
+  expect(S().newCards).toEqual(['N', 'N2', 'H2', 'O2']);
+});

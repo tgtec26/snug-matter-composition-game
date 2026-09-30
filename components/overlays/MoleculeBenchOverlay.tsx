@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '@/game/store';
 import { useDataStore } from '@/game/dataStore';
-import { addToDex } from '@/game/dex';
 import { canGrow, identifyMolecule, liveFormula, moleculeStars } from '@/game/rules';
 import { iga, ieyo } from '@/game/josa';
 import { playSfx } from '@/game/audio';
@@ -91,6 +90,7 @@ export function MoleculeBenchOverlay({ step }: { step: Step }) {
   const ref = useRef<A[]>([]);
   const busy = useRef(false);
   const detaches = useRef(0);
+  const bounces = useRef(0);   // 목록 밖 조합으로 튕긴 횟수 (요약 팝업 실수)
   const extras = useRef<string[]>([]);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   useEffect(() => () => clearTimeout(timer.current), []);
@@ -115,12 +115,11 @@ export function MoleculeBenchOverlay({ step }: { step: Step }) {
       setMsg(hints?.[`done${target.id}`] ?? '');
       if (target.id === 'H2O') window.dispatchEvent(new CustomEvent('room-fx', { detail: { kind: 'electrolysis' } }));
       const stars = moleculeStars(detaches.current, (Date.now() - t0) / 1000 > seconds);
-      timer.current = setTimeout(() => completeRoom({ room: 'molecule', target: target.id, stars, extra: extras.current }), target.id === 'H2O' ? 3800 : 2600);
+      timer.current = setTimeout(() => completeRoom({ room: 'molecule', target: target.id, stars, extra: extras.current, misses: bounces.current }), target.id === 'H2O' ? 3800 : 2600);
       return;
     }
     setBonus({ formula: m.formula, name: m.name });
     if (!extras.current.includes(m.id)) extras.current.push(m.id);
-    addToDex('molecules', m.id);
     playSfx('correct');
     setMsg(`그건 ${iga(target.name)} 아니라 ${ieyo(m.name)}`);
   };
@@ -132,7 +131,7 @@ export function MoleculeBenchOverlay({ step }: { step: Step }) {
     const near = on.length ? Math.min(...on.map(a => Math.hypot(a.x - x, a.y - y))) : Infinity;
     const attach = !on.length || near <= snap;
     if (attach && !canGrow(d, [...syms, el])) {   // 목록 분자의 일부가 아니면 튕겨 나간다
-      playSfx('error'); setShake(k => k + 1); setMsg(hints?.moleculeNone ?? '교과서에 없는 조합이라 붙지 않아요');
+      bounces.current++; playSfx('error'); setShake(k => k + 1); setMsg(hints?.moleculeNone ?? '교과서에 없는 조합이라 붙지 않아요');
       if (id === undefined) setGhost({ k: Date.now(), x, y, el });
       return;
     }

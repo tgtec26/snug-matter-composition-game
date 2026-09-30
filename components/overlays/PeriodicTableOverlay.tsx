@@ -64,7 +64,7 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
     setMsg(target.symbol === 'H' ? '금속과는 성질이 달라' : '');
     if ((target.group === 1 && target.symbol !== 'H') || target.group === 18) window.dispatchEvent(new CustomEvent('room-fx', { detail: { symbol: target.symbol, group: target.group } }));
     const stars = tableStars(misses, (Date.now() - t0) / 1000 > seconds) + bonusStars;
-    setTimeout(() => completeRoom({ room: 'table', target: target.symbol, stars }), 2600);
+    setTimeout(() => completeRoom({ room: 'table', target: target.symbol, stars, misses }), 2600);
   }, [target, locked, elements, hints, misses, t0, seconds, bonusStars, completeRoom]);
 
   const onDrop = useCallback((_id: string, x: number, y: number) => place(cellAt(x, y)), [place]);

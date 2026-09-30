@@ -84,7 +84,7 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
     playSfx('correct'); setTimeout(() => playSfx('success'), 350);
     const stars = ionStars(fails);
     if (withLattice) setTimeout(() => { setPhase('lattice'); setDone(false); busy.current = true; setTimeout(() => { busy.current = false; }, 800); }, 1800);
-    else setTimeout(() => completeRoom({ room: 'ion', target: step.target, stars }), 2000);
+    else setTimeout(() => completeRoom({ room: 'ion', target: step.target, stars, misses: fails }), 2000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locked, targetIon, step.target, fails, withLattice, completeRoom, hints, elements, ions]);
 
@@ -101,7 +101,7 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
 
   if (!targetIon || !atom) return null;
   if (phase === 'lattice') {
-    return <Lattice size={size} hints={hints} onDone={misses => completeRoom({ room: 'ion', target: step.target, stars: ionStars(fails, misses) })} />;
+    return <Lattice size={size} hints={hints} onDone={misses => completeRoom({ room: 'ion', target: step.target, stars: ionStars(fails, misses), misses: fails + misses })} />;
   }
   const hiddenEl = drag?.id.startsWith('el:') ? Number(drag.id.slice(3)) : -1;
   const overOut = drag?.id.startsWith('el:') && dist(drag.x, drag.y, CX, CY) > OUT_R;

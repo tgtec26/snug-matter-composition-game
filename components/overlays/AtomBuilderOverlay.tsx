@@ -145,7 +145,7 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
     playSfx('correct'); setTimeout(() => playSfx('success'), 350);
     setMsg(''); setDone({ symbol: res.element.symbol, name: res.element.name });
     const stars = atomStars(v.wobble, (Date.now() - t0) / 1000 > seconds, v.fails);
-    setTimeout(() => completeRoom({ room: 'atom', target: res.element.symbol, stars }), 2000);
+    setTimeout(() => completeRoom({ room: 'atom', target: res.element.symbol, stars, misses: v.fails }), 2000);
   }, [locked, elements, tutorial, hints, step.target, target, t0, seconds, completeRoom]);
 
   useEffect(() => {

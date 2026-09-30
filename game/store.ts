@@ -12,7 +12,7 @@ export interface GameState {
   newCards: string[]; startedAt: number | null; elapsedMs: number;
   tutorialDone: boolean; classifyMissed: boolean;
 }
-export interface RoomResult { room: Step['room']; target: string; stars: number; extra?: string[] }
+export interface RoomResult { room: Step['room']; target: string; stars: number; extra?: string[]; misses?: number }
 interface Actions {
   start: (nickname: string) => void;
   next: () => void;
@@ -56,11 +56,11 @@ export const useGameStore = create<GameState & Actions>()(persist((set, get) => 
   completeRoom: (r) => set(s => {
     const cur = s.queue[s.stepIdx];
     if (s.phase !== 'room' || !cur || cur.room !== r.room || cur.target !== r.target) return {};
-    const isNew = addToDex(KIND[r.room], r.target);
-    for (const x of r.extra ?? []) addToDex('molecules', x);   // 보너스: 다른 물질 카드
+    const gained = addToDex(KIND[r.room], r.target) ? [r.target] : [];
+    for (const x of r.extra ?? []) if (addToDex('molecules', x)) gained.push(x);   // 보너스: 다른 물질 카드
     const stepIdx = s.stepIdx + 1;
-    const newCards = isNew && !s.newCards.includes(r.target) ? [...s.newCards, r.target] : s.newCards;   // 원자 조립·주기율표 배치는 같은 원소 카드
-    const base = { stepIdx, stars: s.stars + r.stars, newCards, classifyMissed: false };
+    const newCards = [...new Set([...s.newCards, ...gained])];   // 원자 조립·주기율표 배치는 같은 원소 카드
+    const base = { stepIdx, stars: s.stars + r.stars, mistakes: s.mistakes + (r.misses ?? 0), newCards, classifyMissed: false };
     return r.room === 'molecule' ? { ...base, phase: 'classify' as Phase } : { ...base, phase: afterRoom(s.queue, stepIdx) };
   }),
   classify: (answer) => set(s => {
