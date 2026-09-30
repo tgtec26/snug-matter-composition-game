@@ -118,10 +118,9 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
               hit ? 'bg-amber-300 border-white text-black' : line ? 'bg-amber-100/40 border-amber-300' : el ? 'bg-sky-100/90 border-sky-300 text-slate-900' : 'bg-white/10 border-white/15'
             } ${hover ? 'ring-4 ring-amber-300' : ''} ${cur ? 'ring-4 ring-white' : ''}`}
               style={{ animation: hit ? 'pop .6s' : undefined, boxShadow: hit ? '0 0 26px 8px #fcd34d' : undefined }}>
-              {el && (<>
-                <span className="text-[12px] opacity-70">{el.number}</span>
-                <span className="text-[24px] font-bold">{el.symbol}</span>
-              </>)}
+              {el && (hit
+                ? <span className="text-[24px] font-bold">{el.symbol}</span>
+                : <span className="text-[22px] font-bold">{el.number}</span>)}
             </div>
           </div>
         );
@@ -133,17 +132,17 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
         <div key={shake} className="absolute pointer-events-auto cursor-grab"
           style={{ left: 640 - 60, top: 500, width: 120, height: 120, touchAction: 'none', opacity: drag ? 0.35 : 1, animation: shake ? 'shake .3s' : undefined }}
           onPointerDown={e => { if (!locked && !busy.current) begin('card', e); }}>
-          <Card symbol={target.symbol} name={target.name} number={target.number} />
+          <Card symbol={target.symbol} name={target.name} />
         </div>
       )}
       {drag && target && (
         <div className="absolute pointer-events-none" style={{ left: drag.x - 60, top: drag.y - 66, width: 120, height: 120, transform: 'scale(1.15)' }}>
-          <Card symbol={target.symbol} name={target.name} number={target.number} lift />
+          <Card symbol={target.symbol} name={target.name} lift />
         </div>
       )}
       {done && target && (
         <div className="absolute pointer-events-none" style={{ left: 640 - 60, top: 500, width: 120, height: 120, animation: 'pop .5s .3s both' }}>
-          <Card symbol={target.symbol} name={target.name} number={target.number} />
+          <Card symbol={target.symbol} name={target.name} />
         </div>
       )}
 
@@ -167,11 +166,11 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
   );
 }
 
-const Card = ({ symbol, name, number, lift = false }: { symbol: string; name: string; number: number; lift?: boolean }) => (
+/** 카드에는 기호·이름만 — 원자 번호는 원자 조립기에서 센 양성자수로 떠올려 칸을 찾는다 */
+const Card = ({ symbol, name, lift = false }: { symbol: string; name: string; lift?: boolean }) => (
   <div className="relative h-full w-full">
     <div className="absolute rounded-full bg-black/40 blur-[4px]" style={{ left: 10, right: 10, bottom: lift ? -22 : -4, height: 16 }} />
     <div className="absolute inset-0 rounded-2xl bg-amber-100 border-4 border-amber-400 text-black text-center flex flex-col items-center justify-center leading-none">
-      <div className="text-[14px] opacity-70">{number}</div>
       <div className="text-[46px] font-bold">{symbol}</div>
       <div className="text-[18px] font-bold mt-1">{name}</div>
     </div>
