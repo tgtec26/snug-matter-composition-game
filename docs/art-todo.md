@@ -78,4 +78,4 @@ CSS로 이미 입체 공(그라데이션+그림자)이 있어 **선택 사항**.
 ※ 위 3·4장의 "선택 사항"·"CSS 우선" 방침은 2026-09-30 사용자 지시("벡터는 텍스트만 남기고 나머지는 이미지로 대체")로 대체됐다. 장치·입자·UI도 그림으로 만든다.
 
 ## 견습생 선택 (2026-10-01)
-시작 화면에서 견습생 3명 중 고른다(`game/characters.ts`). 기존 그림은 `girl1`. **`boy`·`girl2`는 기존 그림의 색만 바꾼 임시본**이라 codex로 새로 그려 교체해야 한다: 남학생(`npc/apprentice_boy.webp`·`_happy`·`_think`), 여학생 2(`npc/apprentice_girl2.webp`·`_happy`·`_think`). 같은 격자 시트 화풍·360px 규격.
+시작 화면에서 견습생 3명 중 고른다(`game/characters.ts`). 3명 모두 codex로 **처음부터 투명 배경**(`gen_image.sh`에서 "REAL TRANSPARENT background" 요청)으로 새로 그려 교체했다. 원본 시트: `docs/assets-source/npc/{girl1,boy,girl2}_transparent.png` → `slice_sheet.py <시트> 3 1 public/assets/npc 360 <이름 3개>`. 흰 배경으로 받아 지우면 경계가 깎이고 내부 흰 얼룩이 남으므로 앞으로 인물·아이템도 투명 배경으로 요청한다.
