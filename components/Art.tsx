@@ -32,7 +32,7 @@ export const artFrame = (src: string, slice: number, w: number): CSSProperties =
   borderStyle: 'solid', borderWidth: 0, borderImage: `url(/assets/${src}.webp) ${slice} fill / ${w}px stretch`,
 });
 
-/** 지름 180 원자핵 자리(border-2 안쪽 기준)에 맞춘 원자핵 그림. 구만 원으로 잘라 쓰고(그림자는 코드), 파란 구라
- *  전자 색과 겹치지 않게 채도를 낮춰 어두운 구로 쓴다. */
-export const NUCLEUS_ART: CSSProperties = { left: -10, top: -3, width: 188, height: 193, clipPath: 'circle(46.5% at 52% 47.5%)', filter: 'saturate(.3) brightness(.75)' };
+/** 지름 180 원자핵 자리(border-2 안쪽 기준)에 맞춘 원자핵 그림. 구만 원으로 잘라 쓰고(그림자는 코드),
+ *  전자(파랑)와 색이 겹치지 않게 회색-남색 구다. */
+export const NUCLEUS_ART: CSSProperties = { left: -10, top: -3, width: 188, height: 193, clipPath: 'circle(46.5% at 52% 47.5%)' };
 export const NUCLEUS_SHADOW: CSSProperties = { left: 15, right: 15, bottom: -34, height: 26 };
