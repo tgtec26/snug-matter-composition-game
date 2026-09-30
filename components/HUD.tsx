@@ -35,10 +35,13 @@ export function HUD() {
 
   return (
     <div className="absolute inset-x-0 top-0 flex items-start justify-between pl-4 pr-[190px] pt-2 text-white select-none text-[15px]">
-      <div className="flex gap-3 rounded-xl bg-black/60 px-4 py-1.5 min-h-[32px]">
-        {title && <span className="text-amber-300 font-bold">{title}</span>}
-        {total > 0 && (phase === 'room' || phase === 'classify') && <span className="text-white/80">방 {Math.min(stepIdx, total)}/{total}</span>}
-      </div>
+      {title ? (
+        <div className="flex gap-3 rounded-xl bg-black/60 px-4 py-1.5 min-h-[32px]">
+          <span className="text-amber-300 font-bold">{title}</span>
+          {/* room: 지금 방이 stepIdx+1번째, classify: completeRoom 뒤라 stepIdx가 이미 방금 끝낸 방 번호 */}
+          {total > 0 && (phase === 'room' || phase === 'classify') && <span className="text-white/80">방 {Math.min(phase === 'room' ? stepIdx + 1 : stepIdx, total)}/{total}</span>}
+        </div>
+      ) : <div />}
       <div className="flex items-center gap-4 rounded-xl bg-black/60 px-4 py-1.5">
         <span className="text-amber-300 font-bold">별 {stars}</span>
         <span className="font-mono text-white/80">{fmt(time)}</span>

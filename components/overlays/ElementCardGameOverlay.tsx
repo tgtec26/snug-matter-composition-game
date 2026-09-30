@@ -13,8 +13,8 @@ const ringPos = (i: number, r = R) => { const a = (i / N) * Math.PI * 2 - Math.P
 const slotPos = (s: number) => ({ x: CX - (4 * SYM + 3 * GAP) / 2 + (s % 4) * (SYM + GAP), y: CY - (3 * SYM + 2 * GAP) / 2 + Math.floor(s / 4) * (SYM + GAP) });
 const shuffled = () => { const a = Array.from({ length: N }, (_, i) => i); for (let i = N - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 
-/** 5-5 보너스: 이름 카드 12장이 원, 기호 카드는 뒤집혀 가운데. 맞는 기호를 뒤집으면 말을 끌어 한 칸 옮기고, 한 바퀴 돌면 끝. (교과서 141쪽 카드 구성을 알 수 없어 수소~마그네슘 12개 사용) */
-export function ElementCardGameOverlay({ onClose }: { onClose: () => void }) {
+/** 5-5 보너스: 이름 카드 12장이 원, 기호 카드는 뒤집혀 가운데. 맞는 기호를 뒤집으면 말을 끌어 한 칸 옮기고, 한 바퀴 돌면 끝. (교과서 141쪽 카드 구성을 알 수 없어 수소~마그네슘 12개 사용) onClose(stars): 한 바퀴를 다 돌았으면 보너스 별, 도중에 닫으면 0. */
+export function ElementCardGameOverlay({ onClose }: { onClose: (stars: number) => void }) {
   const elements = useDataStore(s => s.elements).slice(0, N);
   const [order] = useState(shuffled);           // 가운데 슬롯 → 원소 번호(0~11)
   const [pos, setPos] = useState(0);
@@ -29,6 +29,7 @@ export function ElementCardGameOverlay({ onClose }: { onClose: () => void }) {
   const busy = useRef(false);
   const stage = useRef<HTMLDivElement>(null);
   const done = moved >= N;
+  const close = useCallback(() => onClose(done ? cardGameStars(wrong) : 0), [onClose, done, wrong]);
 
   const flip = useCallback((s: number) => {
     if (locked || busy.current || pending || done || gone.includes(s) || !elements.length) return;
@@ -58,16 +59,16 @@ export function ElementCardGameOverlay({ onClose }: { onClose: () => void }) {
     const onKey = (e: KeyboardEvent) => {
       e.stopPropagation();   // 아래의 주기율표 광장이 키를 받지 않게 한다
       if (e.repeat) return;
-      if (e.key === 'Escape') { onClose(); return; }
+      if (e.key === 'Escape') { close(); return; }
       if (locked && !done) return;
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (done) onClose(); else if (pending) move(); else flip(cursor); return; }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (done) close(); else if (pending) move(); else flip(cursor); return; }
       if (pending && e.key === 'ArrowRight') { move(); return; }
       const d = ({ ArrowLeft: -1, ArrowRight: 1, ArrowUp: -4, ArrowDown: 4 } as Record<string, number>)[e.key];
       if (d) { e.preventDefault(); setCursor(c => Math.min(N - 1, Math.max(0, c + d))); }
     };
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
-  }, [locked, done, pending, cursor, flip, move, onClose]);
+  }, [locked, done, pending, cursor, flip, move, close]);
 
   const pp = ringPos(pos, R + 44);
   const pieceX = drag ? drag.x : pp.x, pieceY = drag ? drag.y : pp.y;
@@ -75,7 +76,7 @@ export function ElementCardGameOverlay({ onClose }: { onClose: () => void }) {
 
   return (
     <div ref={stage} className="absolute inset-0 bg-slate-950/95 pointer-events-auto select-none" style={{ zIndex: 20 }}>
-      <button type="button" aria-label="닫기" onClick={onClose} className="absolute left-4 top-[52px] w-11 h-11 rounded-xl bg-white/15 border border-white/40 text-white text-[22px] font-bold">×</button>
+      <button type="button" aria-label="닫기" onClick={close} className="absolute left-4 top-[52px] w-11 h-11 rounded-xl bg-white/15 border border-white/40 text-white text-[22px] font-bold">×</button>
 
       {elements.map((e, i) => {
         const p = ringPos(i);
@@ -120,7 +121,7 @@ export function ElementCardGameOverlay({ onClose }: { onClose: () => void }) {
         <div className="absolute flex flex-col items-center gap-3" style={{ left: CX - 140, top: CY - 100, width: 280, animation: 'pop .6s .3s both' }}>
           <div className="text-amber-300 text-[36px] font-black">보너스 별</div>
           <div className="text-amber-300 text-[96px] font-black leading-none">+{cardGameStars(wrong)}</div>
-          <button type="button" onClick={onClose} className="h-[52px] px-8 rounded-xl bg-amber-400 border-2 border-amber-200 text-black text-[20px] font-bold">돌아가기</button>
+          <button type="button" onClick={close} className="h-[52px] px-8 rounded-xl bg-amber-400 border-2 border-amber-200 text-black text-[20px] font-bold">돌아가기</button>
         </div>
       </>)}
     </div>

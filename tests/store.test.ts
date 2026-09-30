@@ -161,3 +161,7 @@ it('잠긴 최종 주문은 주문판에서도 accept로 넘어가지 않는다'
   S().acceptOrder('o5');
   expect(S().phase).toBe('orders');
 });
+it('같은 원소를 조립·배치해도 새 카드 목록에는 한 번만 (요약 팝업 중복 방지)', () => {
+  S().start('a'); S().next(); S().acceptOrder('o0'); playQueue();
+  expect(S().newCards).toEqual(['H', 'C', 'O']);
+});

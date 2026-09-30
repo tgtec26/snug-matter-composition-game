@@ -1,4 +1,5 @@
 import type { Dataset, Dex, Element, Ion, Molecule, Order, Step } from '@/game/types';
+import { eunneun } from '@/game/josa';
 
 const SUB = '₀₁₂₃₄₅₆₇₈₉';
 const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
@@ -59,7 +60,8 @@ export function makeIon(d: Dataset, symbol: string, charge: number): { ok: true;
   const ion = d.ions.find(i => i.symbol === symbol && i.charge === charge);
   if (ion) return { ok: true, ion };
   const e = d.ions.find(i => i.symbol === symbol);
-  return fail('ion', e ? `교과서에 없는 이온이에요 — ${e.symbol}는 전자 ${Math.abs(e.charge)}개를 ${e.charge > 0 ? '잃어요' : '얻어요'}` : '교과서에 없는 이온이에요');
+  const name = d.elements.find(x => x.symbol === symbol)?.name.replace(/\(.*\)/, '') ?? symbol;
+  return fail('ion', e ? `교과서에 없는 이온이에요 — ${eunneun(name)} 전자 ${Math.abs(e.charge)}개를 ${e.charge > 0 ? '잃어요' : '얻어요'}` : '교과서에 없는 이온이에요');
 }
 
 /** 4×4 등 격자: '+' | '-' | null. 상하좌우 이웃이 같은 전하면 충돌 */

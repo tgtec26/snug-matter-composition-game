@@ -30,17 +30,25 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
   const [shake, setShake] = useState(0);
   const [done, setDone] = useState<{ p: number; g: number } | null>(null);
   const [cursor, setCursor] = useState<{ p: number; g: number } | null>(null);   // 키보드 조작 시에만 표시
-  const [t0] = useState(() => Date.now());
+  const [t0, setT0] = useState(() => Date.now());
+  const [bonusStars, setBonusStars] = useState(0);
+  const bonusAt = useRef(0);
   const [elapsed, setElapsed] = useState(0);
   const locked = useLock(900);
   const stage = useRef<HTMLDivElement>(null);
   const busy = useRef(false);
 
   useEffect(() => {
-    if (done) return;
+    if (done || bonus) return;   // 보너스 놀이 중에는 시간이 멈춘다
     const t = setInterval(() => setElapsed((Date.now() - t0) / 1000), 200);
     return () => clearInterval(t);
-  }, [done, t0]);
+  }, [done, bonus, t0]);
+  const openBonus = () => { bonusAt.current = Date.now(); setBonus(true); };
+  const closeBonus = (stars: number) => {
+    setT0(t => t + Date.now() - bonusAt.current);   // 놀이한 시간만큼 출발 시각을 늦춘다
+    setBonusStars(b => b || stars);   // 이 방에서 처음 끝낸 놀이의 별만
+    setBonus(false);
+  };
 
   const place = useCallback((c: { p: number; g: number } | null) => {
     if (!c || !target || busy.current || locked) return;
@@ -55,9 +63,9 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
     setDone(c);
     setMsg(target.symbol === 'H' ? '금속과는 성질이 달라' : '');
     if ((target.group === 1 && target.symbol !== 'H') || target.group === 18) window.dispatchEvent(new CustomEvent('room-fx', { detail: { symbol: target.symbol, group: target.group } }));
-    const stars = tableStars(misses, (Date.now() - t0) / 1000 > seconds);
+    const stars = tableStars(misses, (Date.now() - t0) / 1000 > seconds) + bonusStars;
     setTimeout(() => completeRoom({ room: 'table', target: target.symbol, stars }), 2600);
-  }, [target, locked, elements, hints, misses, t0, seconds, completeRoom]);
+  }, [target, locked, elements, hints, misses, t0, seconds, bonusStars, completeRoom]);
 
   const onDrop = useCallback((_id: string, x: number, y: number) => place(cellAt(x, y)), [place]);
   const { drag, begin } = useDrag(stage, onDrop);
@@ -145,9 +153,9 @@ export function PeriodicTableOverlay({ step }: { step: Step }) {
       </div>
 
       {/* 보너스 놀이 입구 (5-5) */}
-      <button type="button" aria-label="보너스 놀이" onClick={e => { setBonus(true); e.currentTarget.blur(); }} className="absolute pointer-events-auto rounded-xl border-4 border-amber-300 bg-indigo-500/80 text-amber-200 text-[40px] font-black"
-        style={{ left: 1150, top: 500, width: 76, height: 104, animation: 'bob 1.4s infinite' }}>?</button>
-      {bonus && <ElementCardGameOverlay onClose={() => setBonus(false)} />}
+      {!done && <button type="button" aria-label="보너스 놀이" onClick={e => { openBonus(); e.currentTarget.blur(); }} className="absolute pointer-events-auto rounded-xl border-4 border-amber-300 bg-indigo-500/80 text-amber-200 text-[40px] font-black"
+        style={{ left: 1150, top: 500, width: 76, height: 104, animation: 'bob 1.4s infinite' }}>?</button>}
+      {bonus && <ElementCardGameOverlay onClose={closeBonus} />}
 
       <div className="absolute rounded-full bg-white/15 overflow-hidden" style={{ left: 340, top: 680, width: 600, height: 14 }}>
         <div className={`h-full rounded-full ${left < 0.2 ? 'bg-red-400' : 'bg-emerald-400'}`} style={{ width: `${left * 100}%`, transition: 'width .2s linear' }} />

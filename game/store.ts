@@ -59,7 +59,7 @@ export const useGameStore = create<GameState & Actions>()(persist((set, get) => 
     const isNew = addToDex(KIND[r.room], r.target);
     for (const x of r.extra ?? []) addToDex('molecules', x);   // 보너스: 다른 물질 카드
     const stepIdx = s.stepIdx + 1;
-    const newCards = isNew ? [...s.newCards, r.target] : s.newCards;
+    const newCards = isNew && !s.newCards.includes(r.target) ? [...s.newCards, r.target] : s.newCards;   // 원자 조립·주기율표 배치는 같은 원소 카드
     const base = { stepIdx, stars: s.stars + r.stars, newCards, classifyMissed: false };
     return r.room === 'molecule' ? { ...base, phase: 'classify' as Phase } : { ...base, phase: afterRoom(s.queue, stepIdx) };
   }),

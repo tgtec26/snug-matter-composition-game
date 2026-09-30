@@ -92,6 +92,12 @@ describe('makeIon', () => {
     }
   });
   it('Na²⁺ 불가', () => { expect(makeIon(d, 'Na', 2).ok).toBe(false); });
+  it('불가 안내는 원소 이름과 조사로 (Cl는 X)', () => {
+    const r = makeIon(d, 'Cl', -2);
+    expect(!r.ok && r.hint).toBe('교과서에 없는 이온이에요 — 염소는 전자 1개를 얻어요');
+    const m = makeIon(d, 'Mg', 1);
+    expect(!m.ok && m.hint).toBe('교과서에 없는 이온이에요 — 마그네슘은 전자 2개를 잃어요');
+  });
 });
 
 describe('checkLattice', () => {
