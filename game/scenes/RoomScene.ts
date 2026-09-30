@@ -15,6 +15,7 @@ export class RoomScene extends Phaser.Scene {
       const { symbol, group, kind } = (e as CustomEvent<{ symbol?: string; group?: number; kind?: string }>).detail;
       const before = this.children.list.length;
       if (kind === 'electrolysis') this.electrolysis();
+      else if (kind === 'lattice') this.lattice();
       else if (group === 1) this.bucket(); else if (group === 18) this.balloon(NEON[symbol ?? ''] ?? 0xfde68a);
       const made = this.children.list.slice(before);   // 연출 물체는 3.6초 뒤 정리
       this.time.delayedCall(3600, () => made.forEach(o => o.destroy()));
@@ -41,6 +42,13 @@ export class RoomScene extends Phaser.Scene {
         this.tweens.add({ targets: b, y: y - 70 - Phaser.Math.Between(0, 30), x: b.x + Phaser.Math.Between(-10, 10), alpha: { from: 1, to: 0 },
           delay: 300 + i * (n === 24 ? 70 : 140), duration: 900, onStart: () => b.setAlpha(1) });
       }
+    }
+  }
+  /** 염화 나트륨 격자 완성: 4×4 칸이 대각선 순서로 차례로 반짝인다 (오버레이 격자 좌표 440,190 · 칸 100) */
+  private lattice() {
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+      const g = this.add.circle(490 + c * 100, 240 + r * 100, 20, c + r & 1 ? 0x60a5fa : 0xfbbf24, 0.7);
+      this.tweens.add({ targets: g, scale: { from: 0.5, to: 3.2 }, alpha: { from: 0.8, to: 0 }, delay: (r + c) * 110, duration: 700 });
     }
   }
   /** 물통에 금속 조각을 넣으면 기체 방울이 올라온다 */

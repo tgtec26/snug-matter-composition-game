@@ -98,3 +98,17 @@ export const tableStars = (misses: number, overTime: boolean) =>
 /** 분자 조립소 별점: 붙였다 뗀 횟수 1~2회 -1, 3회 이상 -2, 시간 초과 -1 (최소 1) */
 export const moleculeStars = (detaches: number, overTime: boolean) =>
   Math.max(1, 3 - (detaches > 2 ? 2 : detaches > 0 ? 1 : 0) - (overTime ? 1 : 0));
+
+/** 이온 공방 별점: 확인 버튼을 눌러 틀린 횟수 1회 -1, 2회 이상 -2 (최소 1) */
+export const ionStars = (fails: number) => Math.max(1, 3 - Math.min(fails, 2));
+
+/** 격자에서 같은 전하 이웃과 붙은 칸들 ("r,c") */
+export function latticeConflictCells(grid: (string | null)[][]): string[] {
+  const out = new Set<string>();
+  grid.forEach((row, r) => row.forEach((v, c) => {
+    if (!v) return;
+    if (grid[r][c + 1] === v) { out.add(`${r},${c}`); out.add(`${r},${c + 1}`); }
+    if (grid[r + 1]?.[c] === v) { out.add(`${r},${c}`); out.add(`${r + 1},${c}`); }
+  }));
+  return [...out];
+}
