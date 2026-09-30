@@ -48,7 +48,8 @@ export const useGameStore = create<GameState & Actions>()(persist((set, get) => 
   acceptOrder: (id) => set(s => {
     const o = order(id);
     if (!o || !['orders', 'accept'].includes(s.phase) || !isOrderOpen(o, s.doneOrders) || s.doneOrders.includes(id)) return {};
-    if (s.phase === 'accept' && id !== s.orderId) return {};   // 튜토리얼 화면에서는 제시된 주문만
+    if (s.phase === 'orders') return { orderId: id, phase: 'accept' as Phase };   // 수락 대사 먼저
+    if (id !== s.orderId) return {};   // accept 화면에서는 제시된 주문만
     const queue = pendingSteps(o, loadDex());
     return { orderId: id, queue, stepIdx: 0, phase: afterRoom(queue, 0) };
   }),

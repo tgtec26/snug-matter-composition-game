@@ -26,8 +26,10 @@ const playQueue = () => {
     }
   }
 };
+/** 주문판에서 고르기: orders → accept → (대사 확인) → room */
+const pick = (id: string) => { S().acceptOrder(id); S().acceptOrder(id); };
 const playOrder = (id: string) => {
-  S().acceptOrder(id); playQueue();
+  pick(id); playQueue();
   expect(S().phase).toBe('result'); S().next(); expect(S().phase).toBe('quiz'); S().finishQuiz(true);
 };
 const finishTutorial = () => { S().start('a'); S().next(); S().acceptOrder('o0'); playQueue(); S().next(); S().finishQuiz(true); };
@@ -66,7 +68,7 @@ it('튜토리얼 완주: 분자 방 없이 result → quiz → finishQuiz 후 or
   expect(S().doneOrders).toEqual(['o0']);
 });
 it('classify 오답은 phase 유지·별 감점, 정답이면 진행', () => {
-  S().start('a'); force('orders'); S().acceptOrder('o1');
+  S().start('a'); force('orders'); pick('o1');
   S().completeRoom({ room: 'molecule', target: 'H2O', stars: 3 });
   expect(S().phase).toBe('classify');
   S().classify('원소');
@@ -81,7 +83,7 @@ it('최종 주문은 1~4 완료 전 수락 불가, 완료 후 가능', () => {
   S().acceptOrder('o5');
   expect(S().phase).toBe('orders');
   for (const id of ['o1', 'o2', 'o3', 'o4']) playOrder(id);
-  S().acceptOrder('o5');
+  pick('o5');
   expect(S().phase).toBe('room');
 });
 it('주문 5개 완료 → ending → next → summary', () => {
@@ -117,7 +119,7 @@ it('완료한 주문은 재수락 불가 (별 파밍 방지)', () => {
   expect(S().stars).toBe(stars);
 });
 it('classify 오답 3번이어도 별은 1개만 감점, mistakes는 매번 +1', () => {
-  S().start('a'); force('orders'); S().acceptOrder('o1');
+  S().start('a'); force('orders'); pick('o1');
   S().completeRoom({ room: 'molecule', target: 'H2O', stars: 3 });
   S().classify('원소'); S().classify('원소'); S().classify('원소');
   expect(S().stars).toBe(2); expect(S().mistakes).toBe(3);
@@ -125,7 +127,7 @@ it('classify 오답 3번이어도 별은 1개만 감점, mistakes는 매번 +1',
   expect(S().phase).toBe('result');
 });
 it('다음 분자 방의 classify는 감점 플래그가 리셋된다', () => {
-  S().start('a'); force('orders'); S().acceptOrder('o2');
+  S().start('a'); force('orders'); pick('o2');
   S().completeRoom({ room: 'atom', target: 'N', stars: 0 });
   S().completeRoom({ room: 'table', target: 'N', stars: 0 });
   S().completeRoom({ room: 'molecule', target: 'N2', stars: 3 });
@@ -137,11 +139,25 @@ it('다음 분자 방의 classify는 감점 플래그가 리셋된다', () => {
   expect(S().stars).toBe(4);   // 2 + 3 - 1
 });
 it('데이터가 로드되기 전(새로고침 직후) classify는 무시', () => {
-  S().start('a'); force('orders'); S().acceptOrder('o2');
+  S().start('a'); force('orders'); pick('o2');
   S().completeRoom({ room: 'atom', target: 'N', stars: 0 });
   S().completeRoom({ room: 'table', target: 'N', stars: 0 });
   S().completeRoom({ room: 'molecule', target: 'N2', stars: 3 });
   useDataStore.setState({ loaded: false, molecules: [] } as never);
   S().classify('화합물');
   expect(S().mistakes).toBe(0); expect(S().stars).toBe(3); expect(S().phase).toBe('classify');
+});
+it('주문판에서 고르면 accept phase에 머물고(대사), 확인해야 room으로 간다', () => {
+  finishTutorial();
+  S().acceptOrder('o1');
+  expect(S().phase).toBe('accept'); expect(S().orderId).toBe('o1');
+  S().acceptOrder('o2');   // 제시된 주문이 아니면 무시
+  expect(S().orderId).toBe('o1'); expect(S().phase).toBe('accept');
+  S().acceptOrder('o1');
+  expect(S().phase).toBe('room'); expect(S().queue.length).toBe(1);
+});
+it('잠긴 최종 주문은 주문판에서도 accept로 넘어가지 않는다', () => {
+  finishTutorial();
+  S().acceptOrder('o5');
+  expect(S().phase).toBe('orders');
 });
