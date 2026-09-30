@@ -61,3 +61,9 @@
 - 요약 PNG: html-to-image가 border-image 그림을 못 넣어서 저장 순간 같은 그림을 data URL로 바꿔 끼운다(PNG에 테두리·별·견습생 포함 확인).
 - 확인: test(72)·typecheck·lint·build·diff --check. 1280×800 헤드리스 크롬(포인터 이벤트를 elementFromPoint 요소에 보내 히트 영역 검증) + 인앱 브라우저 실제 드래그 일부로 타이틀→튜토리얼(H 실패/성공, C·O 키보드)→주기율표(오배치/정배치, 보너스 카드 놀이 한 바퀴)→주문 1(물: 붙이기·튕김·떼기, 갈림길 오답/정답)→퀴즈(오답/정답)→주문 4(Na·Cl, 이온 실패/성공, 격자 충돌/완성)→엔딩→요약·PNG.
 - 남은 일: Phaser 쪽 그림(npc 발밑, fx 건전지·비커·물통 등)도 같은 흰 그림자 문제가 있다 — `fix_shadow.py` 적용 검토(흰 가운 등 밝은 가장자리가 먹히지 않는지 확인 필요).
+
+### 그림 교체 잔여 결함 4건 (2026-10-01)
+- **Phaser 그림 그림자**: `fix_shadow.py`를 npc 견습생 3장·fx/battery는 기본값(SAT=50), 밝은 물체인 doctor·balloon·bucket·cup·metal은 `SAT=10`으로 적용(SAT=50은 흰 가운·풍선·유리·금속 하이라이트를 검게 먹어 제외). 공작소·물통·풍선·물 분해 연출을 브라우저에서 확인. 컵 바닥에 옅은 그림자 자국이 조금 남는다(허용).
+- **fx/nucleus**: codex로 회색-남색 구(`docs/assets-source/fx/nucleus2.png`) 생성 → 기존 351×360 구도(구 지름 326, 중심 182,171)에 맞춰 WebP 변환. `NUCLEUS_ART`의 색 필터 제거. 원자 방·이온 공방에서 파란 전자와 구분됨을 확인.
+- **React same key 오류**: 원인 = 새 카드 중복 수정(bdcfe4b) 이전에 브라우저 localStorage(`particle-run-v1`)에 저장된 `newCards`에 같은 카드가 두 번 들어 있어 요약 팝업 `key={id}`가 겹침(H·C·O·Na·Cl·N·Mg = 원자 방+주기율표 방이 같은 원소를 두 번 얻던 옛 흐름). 새 흐름은 재현되지 않음. persist `merge`에서 `newCards`를 중복 제거해 불러오도록 수정 + 테스트 1건.
+- **ui/knob·ui/card_front**: card_front는 fix_shadow 적용(17px). knob은 아래 분홍빛 얼룩이 채도가 높아 SAT=90까지 올려도 제거되지 않아(금색 본체가 깎임) 원본 유지 — 작게 쓰는 손잡이라 무시.
