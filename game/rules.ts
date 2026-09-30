@@ -94,3 +94,7 @@ export const atomStars = (wobble: number, overTime: boolean, fails: number) =>
 /** 주기율표 광장 별점: 오배치 1~2회 -1, 3회 이상 -2, 시간 초과 -1 (최소 1) */
 export const tableStars = (misses: number, overTime: boolean) =>
   Math.max(1, 3 - (misses > 2 ? 2 : misses > 0 ? 1 : 0) - (overTime ? 1 : 0));
+
+/** 분자 조립소 별점: 붙였다 뗀 횟수 1~2회 -1, 3회 이상 -2, 시간 초과 -1 (최소 1) */
+export const moleculeStars = (detaches: number, overTime: boolean) =>
+  Math.max(1, 3 - (detaches > 2 ? 2 : detaches > 0 ? 1 : 0) - (overTime ? 1 : 0));

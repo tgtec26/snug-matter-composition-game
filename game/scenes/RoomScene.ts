@@ -12,14 +12,36 @@ export class RoomScene extends Phaser.Scene {
     addBg(this, 'room_bg', 0x1c3a3a);
     attachRouter(this);
     const onFx = (e: Event) => {
-      const { symbol, group } = (e as CustomEvent<{ symbol: string; group: number }>).detail;
+      const { symbol, group, kind } = (e as CustomEvent<{ symbol?: string; group?: number; kind?: string }>).detail;
       const before = this.children.list.length;
-      if (group === 1) this.bucket(); else if (group === 18) this.balloon(NEON[symbol] ?? 0xfde68a);
+      if (kind === 'electrolysis') this.electrolysis();
+      else if (group === 1) this.bucket(); else if (group === 18) this.balloon(NEON[symbol ?? ''] ?? 0xfde68a);
       const made = this.children.list.slice(before);   // 연출 물체는 3.6초 뒤 정리
       this.time.delayedCall(3600, () => made.forEach(o => o.destroy()));
     };
     window.addEventListener('room-fx', onFx);
     this.events.once('shutdown', () => window.removeEventListener('room-fx', onFx));
+  }
+  /** 물 분해: 건전지에 연결한 두 전극에서 기체 방울이 올라온다 (분자 조립소, 화면 오른쪽) */
+  private electrolysis() {
+    const x = 1090, y = 600;
+    this.add.ellipse(x, y + 92, 200, 26, 0x000000, 0.4);
+    this.add.rectangle(x, y + 30, 170, 130, 0x60a5fa, 0.7).setStrokeStyle(4, 0xe0f2fe);
+    const batt = this.add.rectangle(x, y - 200, 96, 46, 0x374151).setStrokeStyle(3, 0xffffff);
+    this.add.rectangle(x - 30, y - 230, 14, 12, 0xef4444);
+    this.add.rectangle(x + 30, y - 230, 14, 12, 0x94a3b8);
+    for (const dx of [-40, 40]) {
+      this.add.rectangle(x + dx, y - 40, 8, 150, 0xd1d5db).setStrokeStyle(2, 0xffffff);
+      this.add.rectangle(x + dx, y - 146, 4, 62, 0xfde68a);
+    }
+    this.tweens.add({ targets: batt, scale: 1.08, duration: 200, yoyo: true, repeat: 3 });
+    for (const [dx, n, c] of [[-40, 24, 0xffffff], [40, 12, 0xfecaca]] as const) {
+      for (let i = 0; i < n; i++) {
+        const b = this.add.circle(x + dx + Phaser.Math.Between(-6, 6), y + 20, Phaser.Math.Between(3, 7), c, 0).setStrokeStyle(2, c);
+        this.tweens.add({ targets: b, y: y - 70 - Phaser.Math.Between(0, 30), x: b.x + Phaser.Math.Between(-10, 10), alpha: { from: 1, to: 0 },
+          delay: 300 + i * (n === 24 ? 70 : 140), duration: 900, onStart: () => b.setAlpha(1) });
+      }
+    }
   }
   /** 물통에 금속 조각을 넣으면 기체 방울이 올라온다 */
   private bucket() {

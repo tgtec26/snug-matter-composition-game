@@ -4,11 +4,13 @@ import { useGameStore } from '@/game/store';
 import type { Room, Step } from '@/game/types';
 import { AtomBuilderOverlay } from '@/components/overlays/AtomBuilderOverlay';
 import { PeriodicTableOverlay } from '@/components/overlays/PeriodicTableOverlay';
+import { MoleculeBenchOverlay } from '@/components/overlays/MoleculeBenchOverlay';
 
 /** 방 종류 → 오버레이. Task 8~10은 이 표에 한 줄씩만 추가한다 (예: table: PeriodicTableOverlay). */
 export const ROOMS: Partial<Record<Room, ComponentType<{ step: Step }>>> = {
   atom: AtomBuilderOverlay,
   table: PeriodicTableOverlay,
+  molecule: MoleculeBenchOverlay,
 };
 
 export function RoomRouter() {
