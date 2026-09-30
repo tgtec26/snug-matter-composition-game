@@ -1,0 +1,109 @@
+import { it, expect, beforeEach } from 'vitest';
+import elements from '../public/data/elements.json';
+import molecules from '../public/data/molecules.json';
+import ions from '../public/data/ions.json';
+import orders from '../public/data/orders.json';
+import { useDataStore } from '../game/dataStore';
+import { useGameStore } from '../game/store';
+import { clearDex, loadDex } from '../game/dex';
+import type { Order } from '../game/types';
+
+beforeEach(() => {
+  localStorage.clear(); clearDex();
+  useDataStore.setState({ elements, molecules, ions, orders: orders as Order[], loaded: true } as never);
+  useGameStore.getState().reset();
+});
+const S = () => useGameStore.getState();
+const force = (phase: ReturnType<typeof S>['phase']) => useGameStore.setState({ phase });
+/** 현재 대기열을 전부 통과 (분자는 classify까지 정답) */
+const playQueue = () => {
+  while (S().phase === 'room') {
+    const { room, target } = S().queue[S().stepIdx];
+    S().completeRoom({ room, target, stars: 3 });
+    if (S().phase === 'classify') {
+      const m = molecules.find(x => x.id === target)!;
+      S().classify(m.kind as '원소' | '화합물');
+    }
+  }
+};
+const playOrder = (id: string) => {
+  S().acceptOrder(id); playQueue();
+  expect(S().phase).toBe('result'); S().next(); expect(S().phase).toBe('quiz'); S().finishQuiz(true);
+};
+const finishTutorial = () => { S().start('a'); S().next(); S().acceptOrder('o0'); playQueue(); S().next(); S().finishQuiz(true); };
+
+it('title → intro → accept(튜토리얼 주문 o0 자동 제시)', () => {
+  S().start('아이');
+  expect(S().phase).toBe('intro');
+  S().next();
+  expect(S().phase).toBe('accept');
+  expect(S().orderId).toBe('o0');
+});
+it('임의 phase 점프 금지: title에서 completeRoom 무시', () => {
+  S().completeRoom({ room: 'atom', target: 'H', stars: 3 });
+  expect(S().phase).toBe('title');
+});
+it('튜토리얼 화면에서는 제시된 o0만 수락', () => {
+  S().start('a'); S().next(); S().acceptOrder('o1');
+  expect(S().phase).toBe('accept');
+});
+it('방 진행: step 순서·대상이 맞을 때만 진전', () => {
+  S().start('a'); S().next(); S().acceptOrder('o0');
+  expect(S().phase).toBe('room');
+  S().completeRoom({ room: 'atom', target: 'C', stars: 3 });   // 순서 틀림
+  expect(S().stepIdx).toBe(0);
+  S().completeRoom({ room: 'atom', target: 'H', stars: 3 });
+  expect(S().stepIdx).toBe(1);
+  expect(loadDex().elements).toEqual(['H']);
+});
+it('튜토리얼 완주: 분자 방 없이 result → quiz → finishQuiz 후 orders 복귀', () => {
+  S().start('a'); S().next(); S().acceptOrder('o0'); playQueue();
+  expect(S().phase).toBe('result');
+  S().next(); expect(S().phase).toBe('quiz');
+  S().finishQuiz(false);
+  expect(S().phase).toBe('orders');
+  expect(S().tutorialDone).toBe(true);
+  expect(S().doneOrders).toEqual(['o0']);
+});
+it('classify 오답은 phase 유지·별 감점, 정답이면 진행', () => {
+  S().start('a'); force('orders'); S().acceptOrder('o1');
+  S().completeRoom({ room: 'molecule', target: 'H2O', stars: 3 });
+  expect(S().phase).toBe('classify');
+  S().classify('원소');
+  expect(S().phase).toBe('classify');
+  expect(S().stars).toBe(2); expect(S().mistakes).toBe(1);
+  S().classify('화합물');
+  expect(S().phase).toBe('result');
+});
+it('최종 주문은 1~4 완료 전 수락 불가, 완료 후 가능', () => {
+  finishTutorial();
+  expect(S().phase).toBe('orders');
+  S().acceptOrder('o5');
+  expect(S().phase).toBe('orders');
+  for (const id of ['o1', 'o2', 'o3', 'o4']) playOrder(id);
+  S().acceptOrder('o5');
+  expect(S().phase).toBe('room');
+});
+it('주문 5개 완료 → ending → next → summary', () => {
+  finishTutorial();
+  for (const id of ['o1', 'o2', 'o3', 'o4', 'o5']) playOrder(id);
+  expect(S().phase).toBe('ending');
+  S().next(); expect(S().phase).toBe('summary');
+});
+it('restartRun은 도감을 유지하고 진행만 초기화, 튜토리얼은 건너뜀', () => {
+  S().start('a'); S().next(); S().acceptOrder('o0');
+  S().completeRoom({ room: 'atom', target: 'H', stars: 3 });
+  S().restartRun();
+  expect(S().phase).toBe('intro'); expect(S().doneOrders).toEqual([]);
+  expect(loadDex().elements).toEqual(['H']);
+  S().next(); expect(S().phase).toBe('orders');
+});
+it('새로고침 복원: 저장된 진행이 rehydrate로 돌아온다', async () => {
+  S().start('a'); S().next(); S().acceptOrder('o0');
+  S().completeRoom({ room: 'atom', target: 'H', stars: 3 });
+  const raw = localStorage.getItem('particle-run-v1')!;
+  useGameStore.setState({ phase: 'title', stepIdx: 0, orderId: null, queue: [] });
+  localStorage.setItem('particle-run-v1', raw);
+  await useGameStore.persist.rehydrate();
+  expect(S().phase).toBe('room'); expect(S().stepIdx).toBe(1); expect(S().orderId).toBe('o0');
+});
