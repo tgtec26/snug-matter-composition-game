@@ -141,5 +141,6 @@ describe('주문 진행', () => {
 
 describe('linearOrder', () => {
   it('CO₂는 산소-탄소-산소 순서', () => expect(linearOrder('CO2', ['C', 'O', 'O'])).toEqual(['O', 'C', 'O']));
-  it('목록에 없는 분자는 그대로', () => expect(linearOrder('H2O', ['H', 'H', 'O'])).toEqual(['H', 'H', 'O']));
+  it('H₂O 이름표는 수소-산소-수소 순서', () => expect(linearOrder('H2O', ['H', 'H', 'O'])).toEqual(['H', 'O', 'H']));
+  it('목록에 없는 분자는 그대로', () => expect(linearOrder('CH4', ['C', 'H', 'H', 'H', 'H'])).toEqual(['C', 'H', 'H', 'H', 'H']));
 });
