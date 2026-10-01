@@ -18,6 +18,8 @@ const STYLE: Record<Kind, { src: string; sym: string; name: string }> = {
   n: { src: 'items/neutron', sym: '', name: '중성자' },
   e: { src: 'items/electron', sym: '−', name: '전자' },
 };
+/** 전자 m개를 고리에 고르게: 맨 위 자리부터 같은 간격으로 */
+const evenSlots = (m: number) => Array.from({ length: m }, (_, i) => Math.round((i * MAX) / m) % MAX);
 const slotPos = (i: number) => { const a = (i / MAX) * Math.PI * 2 - Math.PI / 2; return { x: CX + Math.cos(a) * RING_R, y: CY + Math.sin(a) * RING_R }; };
 /** 원자핵 안 입자 자리: 해바라기 배열, 양성자·중성자를 번갈아 섞는다 */
 /** 핵 안 입자 자리: 개수에 맞춰 퍼지는 해바라기 배열(중심에서 가장자리까지 고르게). 입자는 p·n이 번갈아 놓인다. */
@@ -76,7 +78,8 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
     if (k === 'n') return v.n >= MAX ? v : { ...v, n: v.n + 1 };
     if (v.slots.length >= MAX) return v;
     const free = Array.from({ length: MAX }, (_, i) => i).filter(i => !v.slots.includes(i));
-    return { ...v, slots: [...v.slots, slot !== undefined && free.includes(slot) ? slot : free[0]] };
+    if (slot === undefined) return { ...v, slots: evenSlots(v.slots.length + 1) };   // 자리를 정하지 않으면(클릭·키보드) 전자 전체를 고르게 다시 배치
+    return { ...v, slots: [...v.slots, free.includes(slot) ? slot : free[0]] };
   }), []);
   const remove = useCallback((k: Kind, slot?: number) => setS(v => {
     if (k === 'p') return v.p ? { ...v, p: v.p - 1, wobble: v.wobble + 1 } : v;
@@ -96,13 +99,15 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
     return { best, bd };
   };
 
+  const downAt = useRef({ x: 0, y: 0 });   // 입자 상자에서 누른 자리(클릭과 드래그 구분)
   const onDrop = useCallback((id: string, x: number, y: number) => {
     if (busy.current) return;
     const [from, arg] = id.split(':');
     const inNuc = dist(x, y, CX, CY) <= NUC_R + 20;
     if (from === 'box') {
       const k = arg as Kind;
-      if (k === 'e') { const { best, bd } = nearestFree(x, y); if (bd <= dropR && !inNuc) add('e', best); }
+      if (dist(x, y, downAt.current.x, downAt.current.y) < 12) add(k);   // 클릭·탭: 자동 배치
+      else if (k === 'e') { const { best, bd } = nearestFree(x, y); if (bd <= dropR && !inNuc) add('e', best); }
       else if (inNuc) add(k);
     } else if (from === 'pull') {
       if (!inNuc) remove(arg as Kind);
@@ -116,7 +121,12 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
   }, [add, remove, dropR]);
   const { drag, begin } = useDrag(stage, onDrop);
 
-  const start = (id: string) => (e: React.PointerEvent) => { if (!locked && !busy.current) begin(id, e); };
+  const start = (id: string) => (e: React.PointerEvent) => {
+    if (locked || busy.current) return;
+    const r = stage.current!.getBoundingClientRect();
+    downAt.current = { x: ((e.clientX - r.left) / r.width) * 1280, y: ((e.clientY - r.top) / r.height) * 800 };
+    begin(id, e);
+  };
   const pullFromNucleus = (e: React.PointerEvent) => {
     if (locked || busy.current) return;
     const v = sRef.current, kinds = mix(v.p, tutorial ? v.n : 0);
