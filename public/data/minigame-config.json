@@ -17,7 +17,12 @@
   },
   "ion": {
     "seconds": 60,
-    "lattice": 4,
+    "lattice": 3,
+    "latticePre": [
+      { "r": 0, "c": 0, "v": "+" },
+      { "r": 0, "c": 1, "v": "-" },
+      { "r": 1, "c": 0, "v": "-" }
+    ],
     "dropRadius": 44
   },
   "cardGame": {

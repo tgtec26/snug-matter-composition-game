@@ -21,10 +21,10 @@ export class RoomScene extends Phaser.Scene {
     this.events.once('shutdown', unsub);
     attachRouter(this);
     const onFx = (e: Event) => {
-      const { symbol, group, kind } = (e as CustomEvent<{ symbol?: string; group?: number; kind?: string }>).detail;
+      const { symbol, group, kind, size } = (e as CustomEvent<{ symbol?: string; group?: number; kind?: string; size?: number }>).detail;
       const before = this.children.list.length;
       if (kind === 'electrolysis') this.electrolysis();
-      else if (kind === 'lattice') this.lattice();
+      else if (kind === 'lattice') this.lattice(size ?? 3);
       else if (group === 1) this.bucket(); else if (group === 18) this.balloon(NEON[symbol ?? ''] ?? 0xfde68a);
       const made = this.children.list.slice(before);   // 연출 물체는 3.6초 뒤 정리
       this.time.delayedCall(3600, () => made.forEach(o => o.destroy()));
@@ -62,10 +62,10 @@ export class RoomScene extends Phaser.Scene {
       }
     }
   }
-  /** 염화 나트륨 격자 완성: 4×4 칸이 대각선 순서로 차례로 반짝인다 (오버레이 격자 좌표 440,190 · 칸 100) */
-  private lattice() {
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
-      const g = this.add.circle(490 + c * 100, 240 + r * 100, 20, c + r & 1 ? 0x60a5fa : 0xfbbf24, 0.7);
+  /** 염화 나트륨 격자 완성: n×n 칸이 대각선 순서로 차례로 반짝인다 (오버레이 격자는 무대 중앙 640,390 · 칸 100) */
+  private lattice(n: number) {
+    for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
+      const g = this.add.circle(640 - n * 50 + 50 + c * 100, 390 - n * 50 + 50 + r * 100, 20, c + r & 1 ? 0x60a5fa : 0xfbbf24, 0.7);
       this.tweens.add({ targets: g, scale: { from: 0.5, to: 3.2 }, alpha: { from: 0.8, to: 0 }, delay: (r + c) * 110, duration: 700 });
     }
   }

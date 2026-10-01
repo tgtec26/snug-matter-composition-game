@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '@/game/store';
 import { useDataStore } from '@/game/dataStore';
 import { checkLattice, ionStars, latticeConflictCells, makeIon, toSup } from '@/game/rules';
@@ -12,7 +12,8 @@ import { Art, NUCLEUS_ART, NUCLEUS_SHADOW, Sphere, artBg, artFrame } from '@/com
 import type { Step } from '@/game/types';
 
 const CX = 640, CY = 380, NUC_R = 90, RING_R = 190, OUT_R = RING_R + 50, MAX_GAIN = 3;
-const GL = 440, GT = 190, CELL = 100;   // 격자 (RoomScene.lattice 와 같은 좌표)
+const CELL = 100;   // 격자 칸. 격자는 무대 중앙(640,390)에 놓인다 (RoomScene.lattice 와 같은 좌표)
+interface Pre { r: number; c: number; v: string }
 const dist = (x: number, y: number, ax: number, ay: number) => Math.hypot(x - ax, y - ay);
 /** 원자 번호만큼의 전자를 원 둘레에 균등하게 (껍질 구분 없음) */
 const ringPos = (i: number, n: number) => { const a = (i / n) * Math.PI * 2 - Math.PI / 2; return { x: CX + Math.cos(a) * RING_R, y: CY + Math.sin(a) * RING_R }; };
@@ -33,8 +34,8 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
   const ions = useDataStore(s => s.ions);
   const orders = useDataStore(s => s.orders);
   const hints = useDataStore(s => s.dialog?.hints);
-  const cfg = useDataStore(s => s.minigame?.ion) as { seconds: number; lattice: number; dropRadius: number } | undefined;
-  const size = cfg?.lattice ?? 4;
+  const cfg = useDataStore(s => s.minigame?.ion) as { seconds: number; lattice: number; latticePre?: Pre[]; dropRadius: number } | undefined;
+  const size = cfg?.lattice ?? 3;
   const targetIon = ions.find(i => i.id === step.target);
   const atom = elements.find(e => e.symbol === targetIon?.symbol);
   const Z = atom?.number ?? 0;
@@ -100,7 +101,7 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
 
   if (!targetIon || !atom) return null;
   if (phase === 'lattice') {
-    return <Lattice size={size} hints={hints} onDone={misses => completeRoom({ room: 'ion', target: step.target, stars: ionStars(fails, misses), misses: fails + misses })} />;
+    return <Lattice size={size} pre={cfg?.latticePre ?? []} hints={hints} onDone={misses => completeRoom({ room: 'ion', target: step.target, stars: ionStars(fails, misses), misses: fails + misses })} />;
   }
   const hiddenEl = drag?.id.startsWith('el:') ? Number(drag.id.slice(3)) : -1;
   const overOut = drag?.id.startsWith('el:') && dist(drag.x, drag.y, CX, CY) > OUT_R;
@@ -113,9 +114,9 @@ export function IonWorkshopOverlay({ step }: { step: Step }) {
       </div>
 
       {/* 실시간 이온식·이름 */}
-      <div className="absolute text-center" style={{ left: 980, top: 120, width: 260, height: 150, ...artFrame('ui/panel_glass', 50, 22) }}>
-        <div className="text-[60px] font-bold text-white leading-[80px]" style={{ textShadow: '0 3px 8px #000' }}>{formula}</div>
-        <div className="text-[26px] font-bold text-amber-200 h-[40px]">{live?.ok ? live.ion.name : ''}</div>
+      <div className="absolute text-center flex flex-col items-center justify-center" style={{ left: 980, top: 120, width: 260, height: 150, ...artFrame('ui/panel_glass', 50, 22) }}>
+        <div className="text-[60px] font-bold text-white leading-[70px]" style={{ textShadow: '0 3px 8px #000' }}>{formula}</div>
+        {live?.ok && <div className="text-[26px] font-bold text-amber-200 h-[40px]">{live.ion.name}</div>}
       </div>
 
       {/* 안쪽/바깥 경계 안내: 끌고 있을 때만 반응 */}
@@ -191,8 +192,14 @@ const Tile = ({ v, size = 84, lift = false, bad = false }: { v: string; size?: n
 );
 
 /** 염화 나트륨: Na⁺·Cl⁻ 타일을 격자에 번갈아 놓는다. 판정은 rules.checkLattice. */
-function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string, string>; onDone: (misses: number) => void }) {
-  const [grid, setGrid] = useState<Grid>(() => Array.from({ length: size }, () => Array<string | null>(size).fill(null)));
+function Lattice({ size, pre, hints, onDone }: { size: number; pre: Pre[]; hints?: Record<string, string>; onDone: (misses: number) => void }) {
+  const GL = 640 - (size * CELL) / 2, GT = 390 - (size * CELL) / 2;
+  const fixed = useMemo(() => new Set(pre.map(p => `${p.r},${p.c}`)), [pre]);   // 미리 놓인 칸: 옮기거나 뺄 수 없다
+  const [grid, setGrid] = useState<Grid>(() => {
+    const g = Array.from({ length: size }, () => Array<string | null>(size).fill(null));
+    pre.forEach(p => { if (g[p.r]?.[p.c] !== undefined) g[p.r][p.c] = p.v; });
+    return g;
+  });
   const [bad, setBad] = useState<string[]>([]);
   const [msg, setMsg] = useState('');
   const [cur, setCur] = useState({ r: 0, c: 0 });
@@ -214,16 +221,17 @@ function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string,
     if (res.complete) {
       busy.current = true; setDone(true);
       playSfx('correct'); setTimeout(() => playSfx('success'), 350);
-      window.dispatchEvent(new CustomEvent('room-fx', { detail: { kind: 'lattice' } }));
+      window.dispatchEvent(new CustomEvent('room-fx', { detail: { kind: 'lattice', size } }));
       setTimeout(() => onDone(misses.current), 3200);
     } else playSfx('correct');
-  }, [hints, onDone]);
+  }, [hints, onDone, size]);
   const put = useCallback((r: number, c: number, v: string | null, from?: [number, number]) => {
+    if ((r >= 0 && fixed.has(`${r},${c}`)) || (from && fixed.has(`${from[0]},${from[1]}`))) return;
     const next = gRef.current.map(row => [...row]);
     if (from) next[from[0]][from[1]] = null;
     if (r >= 0) next[r][c] = v;
     apply(next);
-  }, [apply]);
+  }, [apply, fixed]);
 
   const onDrop = useCallback((id: string, x: number, y: number) => {
     if (busy.current) return;
@@ -235,7 +243,7 @@ function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string,
       if (inside && (r !== fr || c !== fc)) put(r, c, v, [fr, fc]);
       else if (!inside) put(-1, 0, null, [fr, fc]);   // 밖으로 끌어내면 뺀다
     }
-  }, [put, size]);
+  }, [put, size, GL, GT]);
   const { drag, begin } = useDrag(stage, onDrop);
   const start = (id: string) => (e: React.PointerEvent) => { if (!locked && !busy.current) begin(id, e); };
 
@@ -265,7 +273,7 @@ function Lattice({ size, hints, onDone }: { size: number; hints?: Record<string,
           <div key={key} className="absolute"
             style={{ left: GL + c * CELL + 4, top: GT + r * CELL + 4, width: CELL - 8, height: CELL - 8, ...artBg(isCur ? 'ui/lattice_cell_lit' : 'ui/lattice_cell') }}>
             {v && key !== hidden && (
-              <div className="absolute cursor-grab pointer-events-auto flex items-center justify-center" style={{ left: -4, top: -4, width: CELL, height: CELL, touchAction: 'none', animation: 'pop .25s' }}
+              <div className={`absolute flex items-center justify-center ${fixed.has(key) ? 'pointer-events-none' : 'cursor-grab pointer-events-auto'}`} style={{ left: -4, top: -4, width: CELL, height: CELL, touchAction: 'none', animation: 'pop .25s' }}
                 onPointerDown={start(`cell:${key}`)}>
                 <Tile v={v} bad={bad.includes(key)} />
               </div>
