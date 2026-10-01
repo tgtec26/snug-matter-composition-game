@@ -110,7 +110,7 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
       else if (k === 'e') { const { best, bd } = nearestFree(x, y); if (bd <= dropR && !inNuc) add('e', best); }
       else if (inNuc) add(k);
     } else if (from === 'pull') {
-      if (!inNuc) remove(arg as Kind);
+      if (!inNuc || dist(x, y, downAt.current.x, downAt.current.y) < 12) remove(arg as Kind);   // 밖으로 끌어내거나 클릭·탭하면 뺀다
     } else if (from === 'el') {
       const i = Number(arg), r = dist(x, y, CX, CY);
       if (Math.abs(r - RING_R) <= dropR && r > NUC_R + 20) {
@@ -135,6 +135,7 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
     const px = (e.clientX - r.left) * k - CX, py = (e.clientY - r.top) * k - CY;
     let best = 0, bd = Infinity;
     kinds.forEach((_, i) => { const q = dotPos(i, kinds.length), d = dist(px, py, q.x, q.y); if (d < bd) { bd = d; best = i; } });
+    downAt.current = { x: ((e.clientX - r.left) / r.width) * 1280, y: ((e.clientY - r.top) / r.height) * 800 };
     begin(`pull:${kinds[best]}`, e);
   };
 
