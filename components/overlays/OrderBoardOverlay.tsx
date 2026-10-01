@@ -97,10 +97,10 @@ function Board() {
         })}
       </div>
 
-      <div className={`absolute flex flex-col items-center justify-center rounded-3xl border-4 border-dashed transition-all ${over ? 'border-amber-300 bg-amber-300/30 scale-105' : 'border-white/50 bg-white/10'}`}
+      <div className={`absolute flex flex-col items-center justify-center rounded-3xl border-[2.8px] border-dashed transition-all ${over ? 'border-amber-300 bg-amber-900/70 scale-105' : 'border-white/80 bg-slate-900/60'}`}
         style={{ left: SLOT.x1 + 20, top: SLOT.y1 + 20, width: SLOT.x2 - SLOT.x1 - 40, height: SLOT.y2 - SLOT.y1 - 40 }}>
-        <Art src="ui/arrow_down" className="mb-1" style={{ width: 36, height: 41, animation: 'bob 1s ease-in-out infinite' }} />
-        <div className="text-[30px] font-black text-white">수락</div>
+        <Art src="ui/arrow_down" className="absolute" style={{ left: '50%', top: -58, marginLeft: -18, width: 36, height: 41, animation: 'bob 1s ease-in-out infinite' }} />
+        <div className="text-[34px] font-black text-white" style={{ textShadow: '0 2px 6px #000' }}>수락</div>
       </div>
 
       {drag && dragged && (
