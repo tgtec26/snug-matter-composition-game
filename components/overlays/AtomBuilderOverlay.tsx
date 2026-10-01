@@ -23,8 +23,9 @@ const evenSlots = (m: number) => Array.from({ length: m }, (_, i) => Math.round(
 const slotPos = (i: number) => { const a = (i / MAX) * Math.PI * 2 - Math.PI / 2; return { x: CX + Math.cos(a) * RING_R, y: CY + Math.sin(a) * RING_R }; };
 /** 원자핵 안 입자 자리: 해바라기 배열, 양성자·중성자를 번갈아 섞는다 */
 /** 핵 안 입자 자리: 개수에 맞춰 퍼지는 해바라기 배열(중심에서 가장자리까지 고르게). 입자는 p·n이 번갈아 놓인다. */
+const dotSize = (total: number) => (total > 28 ? 14 : total > 18 ? 17 : 20);
 const dotPos = (i: number, total: number) => {
-  const R = Math.min(62, 18 * Math.sqrt(total)), r = R * Math.sqrt(i / Math.max(total - 1, 1)), a = i * 2.39996;
+  const R = Math.min(total > 28 ? 70 : 62, 18 * Math.sqrt(total)), r = R * Math.sqrt(i / Math.max(total - 1, 1)), a = i * 2.39996;
   return { x: Math.cos(a) * r, y: Math.sin(a) * r };
 };
 const mix = (p: number, n: number): Kind[] => {
@@ -130,12 +131,12 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
   };
   const pullFromNucleus = (e: React.PointerEvent) => {
     if (locked || busy.current) return;
-    const v = sRef.current, kinds = mix(v.p, tutorial ? v.n : 0);
-    if (!kinds.length) return;
+    const v = sRef.current, kinds = mix(v.p, tutorial ? v.n : (elements.find(x => x.number === v.p)?.neutrons ?? elements.find(x => x.number === v.p)?.nucleusNeutrons ?? 0));
+    if (!kinds.some(k => tutorial || k === 'p')) return;
     const r = stage.current!.getBoundingClientRect(), k = 1280 / r.width;
     const px = (e.clientX - r.left) * k - CX, py = (e.clientY - r.top) * k - CY;
     let best = 0, bd = Infinity;
-    kinds.forEach((_, i) => { const q = dotPos(i, kinds.length), d = dist(px, py, q.x, q.y); if (d < bd) { bd = d; best = i; } });
+    kinds.forEach((k, i) => { if (!tutorial && k !== 'p') return; const q = dotPos(i, kinds.length), d = dist(px, py, q.x, q.y); if (d < bd) { bd = d; best = i; } });
     downAt.current = { x: ((e.clientX - r.left) / r.width) * 1280, y: ((e.clientY - r.top) / r.height) * 800 };
     begin(`pull:${kinds[best]}`, e);
   };
@@ -178,7 +179,7 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
   }, [locked, tutorial, add, remove, finish]);
 
   const live = elements.find(e => e.number === s.p);
-  const kinds = mix(s.p, tutorial ? s.n : Math.min(s.p > 0 ? 3 : 0, MAX));   // 비튜토리얼: 개수 단정 없이 장식용 회색 알갱이
+  const kinds = mix(s.p, tutorial ? s.n : (live?.neutrons ?? live?.nucleusNeutrons ?? 0));   // 비튜토리얼: 박사가 넣어 둔 중성자를 그 원소 수만큼 그린다(빼지 못함)
   const left = Math.max(0, 1 - elapsed / seconds);
   const dragKind = drag ? (drag.id.split(':')[1].replace(/\d+/, 'e') as Kind) : null;
   const trayKinds: Kind[] = tutorial ? ['p', 'n', 'e'] : ['p', 'e'];
@@ -214,7 +215,7 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
           onPointerDown={pullFromNucleus}>
           <Art src="fx/nucleus" className="absolute" style={NUCLEUS_ART} />
           {kinds.map((k, i) => { const q = dotPos(i, kinds.length); return (
-            <div key={i} className="absolute" style={{ left: NUC_R + q.x - 10, top: NUC_R + q.y - 10, width: 20, height: 20, transition: 'left .2s, top .2s' }}><Ball kind={k} size={20} /></div>
+            <div key={i} className="absolute" style={{ left: NUC_R + q.x - dotSize(kinds.length) / 2, top: NUC_R + q.y - dotSize(kinds.length) / 2, width: dotSize(kinds.length), height: dotSize(kinds.length), transition: 'left .2s, top .2s' }}><Ball kind={k} size={dotSize(kinds.length)} /></div>
           ); })}
         </div>
         {done && <Burst count={28} radius={260} />}

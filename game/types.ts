@@ -2,6 +2,7 @@ export interface Element {
   number: number; symbol: string; name: string; group: number; period: number;
   state: '기체' | '액체' | '고체';
   neutrons?: number;   // 교과서 145쪽: 수소 0, 탄소 6, 산소 8 만
+  nucleusNeutrons?: number;   // 핵 그림에 그려 주는 중성자 수(가장 흔한 동위 원소 기준). 판정에는 쓰지 않는다
   page: number;        // 그림 Ⅳ-6 쪽수
 }
 export interface Molecule {
