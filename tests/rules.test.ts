@@ -4,7 +4,7 @@ import molecules from '../public/data/molecules.json';
 import ions from '../public/data/ions.json';
 import type { Dataset, Dex, Order } from '../game/types';
 import {
-  identifyAtom, placeInTable, identifyMolecule, canGrow, liveFormula, classify,
+  identifyAtom, placeInTable, identifyMolecule, canGrow, liveFormula, classify, linearOrder,
   makeIon, checkLattice, pendingSteps, orderDone, isOrderOpen,
 } from '../game/rules';
 
@@ -137,4 +137,9 @@ describe('주문 진행', () => {
     expect(isOrderOpen(fin, ['o1', 'o2', 'o3', 'o4'])).toBe(true);
     expect(isOrderOpen(o, [])).toBe(true);
   });
+});
+
+describe('linearOrder', () => {
+  it('CO₂는 산소-탄소-산소 순서', () => expect(linearOrder('CO2', ['C', 'O', 'O'])).toEqual(['O', 'C', 'O']));
+  it('목록에 없는 분자는 그대로', () => expect(linearOrder('H2O', ['H', 'H', 'O'])).toEqual(['H', 'H', 'O']));
 });

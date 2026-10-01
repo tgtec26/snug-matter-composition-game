@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useGameStore } from '@/game/store';
 import { useDataStore } from '@/game/dataStore';
-import { classify } from '@/game/rules';
+import { classify, linearOrder } from '@/game/rules';
 import { eunneun } from '@/game/josa';
 import { playSfx } from '@/game/audio';
 import { useLock } from '@/components/hooks/useLock';
@@ -91,7 +91,7 @@ export function ClassifyOverlay() {
     <div ref={stage} className="absolute inset-0 select-none">
       {/* 위: 방금 만든 물질 (공이 서로 닿은 모양) */}
       <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-5 px-10" style={{ top: 56, height: 96, ...artFrame('ui/plate_wood', 60, 24) }}>
-        <div className="flex">{atoms.map((k, i) => <div key={i} style={{ marginLeft: i ? -2 : 0 }}><AtomBall sym={k} size={48} /></div>)}</div>
+        <div className="flex">{linearOrder(step?.target ?? '', atoms).map((k, i) => <div key={i} style={{ marginLeft: i ? -2 : 0 }}><AtomBall sym={k} size={48} /></div>)}</div>
         <span className="text-white text-[36px] font-bold whitespace-nowrap">{m?.formula} · {m?.name}</span>
       </div>
 

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameStore } from '@/game/store';
 import { useDataStore } from '@/game/dataStore';
-import { canGrow, identifyMolecule, liveFormula, moleculeStars } from '@/game/rules';
+import { LINEAR_CENTER, canGrow, identifyMolecule, liveFormula, moleculeStars } from '@/game/rules';
 import { iga, ieyo } from '@/game/josa';
 import { playSfx } from '@/game/audio';
 import { useLock } from '@/components/hooks/useLock';
@@ -49,6 +49,18 @@ function repack(list: A[]): A[] {
   const placed: A[] = [on[0]];
   for (const a of on.slice(1)) placed.push({ ...a, ...contactPos(placed, a) });
   return list.map(a => placed.find(p => p.id === a.id) ?? a);
+}
+
+/** 일직선 분자(CO₂): 가운데 원자 좌우에 나머지가 가로 일직선으로 붙게 위치를 바로잡는다. 자리가 작업대 밖이면 그대로 둔다. */
+function straighten(list: A[], targetId: string): A[] {
+  const center = LINEAR_CENTER[targetId];
+  const c = list.find(a => a.on && a.el === center);
+  const side = list.filter(a => a.on && a.el !== center);
+  if (!c || !side.length) return list;
+  const ang = side[0].x < c.x ? Math.PI : 0;   // 가로 일직선: 먼저 붙은 쪽 그대로, 다음 원자는 반대쪽
+  const moved = side.slice(0, 2).map((a, i) => ({ id: a.id, x: c.x + Math.cos(ang + i * Math.PI) * D, y: c.y + Math.sin(ang + i * Math.PI) * D }));
+  if (!moved.every(m => inside(m.x, m.y))) return list;
+  return list.map(a => { const m = moved.find(q => q.id === a.id); return m ? { ...a, x: m.x, y: m.y } : a; });
 }
 
 export const AtomBall = ({ sym, size = D, lift = false, glow = false }: { sym: string; size?: number; lift?: boolean; glow?: boolean }) => (
@@ -138,7 +150,7 @@ export function MoleculeBenchOverlay({ step }: { step: Step }) {
     }
     const pos = !attach ? { x, y } : on.length ? contactPos(on, { x, y }) : { x: clamp(x, BX0 + D / 2, BX1 - D / 2), y: clamp(y, BY0 + D / 2, BY1 - D / 2) };
     const a: A = { id: id ?? nextId++, el, ...pos, on: attach };
-    const next = id === undefined ? [...list, a] : list.map(q => (q.id === id ? a : q));
+    const next = straighten(id === undefined ? [...list, a] : list.map(q => (q.id === id ? a : q)), target?.id ?? '');
     commit(next);
     if (attach) { playSfx('correct'); setMsg(''); evaluate(next); } else setMsg('');
   };
@@ -147,7 +159,7 @@ export function MoleculeBenchOverlay({ step }: { step: Step }) {
     const a = ref.current.find(q => q.id === id);
     if (!a) return;
     if (a.on) { detaches.current++; playSfx('error'); }
-    const next = repack(ref.current.filter(q => q.id !== id));
+    const next = straighten(repack(ref.current.filter(q => q.id !== id)), target?.id ?? '');
     commit(next); setMsg(''); evaluate(next);
   };
 

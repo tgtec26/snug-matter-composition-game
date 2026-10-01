@@ -53,6 +53,16 @@ export function liveFormula(atoms: string[]): string {
   return keys.map(k => k + toSub(c[k])).join('');
 }
 
+/** 일직선 분자: 가운데 원자 기호 (CO₂는 O-C-O). 목록에 없는 분자는 자유 배치 */
+export const LINEAR_CENTER: Record<string, string> = { CO2: 'C' };
+/** 일직선 분자의 그림 순서: 가운데 원자를 중심으로 나머지를 좌우로 나눈다 */
+export function linearOrder(id: string, atoms: string[]): string[] {
+  const c = LINEAR_CENTER[id];
+  if (!c || !atoms.includes(c)) return atoms;
+  const rest = atoms.filter((_, i) => i !== atoms.indexOf(c)), h = Math.ceil(rest.length / 2);
+  return [...rest.slice(0, h), c, ...rest.slice(h)];
+}
+
 export const classify = (atoms: string[]): '원소' | '화합물' =>
   Object.keys(count(atoms)).length === 1 ? '원소' : '화합물';
 
