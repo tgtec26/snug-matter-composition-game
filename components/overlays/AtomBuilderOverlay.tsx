@@ -113,7 +113,8 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
       if (!inNuc || dist(x, y, downAt.current.x, downAt.current.y) < 12) remove(arg as Kind);   // 밖으로 끌어내거나 클릭·탭하면 뺀다
     } else if (from === 'el') {
       const i = Number(arg), r = dist(x, y, CX, CY);
-      if (Math.abs(r - RING_R) <= dropR && r > NUC_R + 20) {
+      if (dist(x, y, downAt.current.x, downAt.current.y) < 12) remove('e', i);   // 클릭·탭: 그 전자를 뺀다
+      else if (Math.abs(r - RING_R) <= dropR && r > NUC_R + 20) {
         const { best } = nearestFree(x, y, i);
         setS(v => ({ ...v, slots: v.slots.map(q => (q === i ? best : q)) }));
       } else remove('e', i);
@@ -222,14 +223,20 @@ export function AtomBuilderOverlay({ step }: { step: Step }) {
       <div className="absolute text-[34px] font-bold text-sky-300" style={{ left: CX - 60, top: CY + NUC_R + 30, width: 120, textAlign: 'center', textShadow: '0 2px 6px #000' }}>−{s.slots.length}</div>
 
       {/* 입자 상자 */}
-      <div className="absolute flex flex-col items-center justify-center gap-5"
-        style={{ left: 40, top: 190, width: 190, height: 400, ...artFrame('ui/tray_wood', 40, 30) }}>
+      <div className="absolute flex flex-col items-center justify-center gap-2"
+        style={{ left: 40, top: 160, width: 190, height: 470, ...artFrame('ui/tray_wood', 40, 30) }}>
         {trayKinds.map(k => (
-          <div key={k} className="flex flex-col items-center gap-1">
+          <div key={k} className="flex flex-col items-center gap-0.5">
             <div className="cursor-grab pointer-events-auto" style={{ width: 76, height: 76, padding: 10, touchAction: 'none' }} onPointerDown={start(`box:${k}`)}>
               <Ball kind={k} size={56} />
             </div>
             <div className="text-[16px] font-bold text-amber-50" style={{ textShadow: '0 1px 3px #000' }}>{STYLE[k].name} ({k.toUpperCase()})</div>
+            <div className="flex gap-2 mt-0.5">
+              {[1, 2, 3].map(n => (
+                <button key={n} type="button" onClick={() => { if (!locked && !busy.current) for (let i = 0; i < n; i++) add(k); }}
+                  className="pointer-events-auto text-[20px] font-bold text-slate-900 rounded-md" style={{ width: 40, height: 34, ...artBg('ui/card_front') }}>{n}</button>
+              ))}
+            </div>
           </div>
         ))}
       </div>
