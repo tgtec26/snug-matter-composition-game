@@ -1,8 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { Phase, Step } from '@/game/types';
-import { classify as classifyAtoms, isOrderOpen, pendingSteps } from '@/game/rules';
-import { addToDex, loadDex } from '@/game/dex';
+import { classify as classifyAtoms, isOrderOpen } from '@/game/rules';
+import { addToDex } from '@/game/dex';
 import { useDataStore } from '@/game/dataStore';
 import type { CharacterId } from '@/game/characters';
 
@@ -52,7 +52,7 @@ export const useGameStore = create<GameState & Actions>()(persist((set, get) => 
     if (!o || !['orders', 'accept'].includes(s.phase) || !isOrderOpen(o, s.doneOrders) || s.doneOrders.includes(id)) return {};
     if (s.phase === 'orders') return { orderId: id, phase: 'accept' as Phase };   // 수락 대사 먼저
     if (id !== s.orderId) return {};   // accept 화면에서는 제시된 주문만
-    const queue = pendingSteps(o, loadDex());
+    const queue = o.steps;   // 도감에 이미 있어도 매 판 모든 단계를 직접 한다 (도감은 카드 수집용)
     return { orderId: id, queue, stepIdx: 0, phase: afterRoom(queue, 0) };
   }),
   completeRoom: (r) => set(s => {

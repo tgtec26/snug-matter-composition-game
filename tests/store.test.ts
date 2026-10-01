@@ -201,3 +201,13 @@ it('저장본에 같은 새 카드가 중복돼 있어도 불러올 때 한 번�
   const merged = merge({ newCards: ['H', 'C', 'H', 'Mg', 'Mg'] }, useGameStore.getState()) as { newCards: string[] };
   expect(merged.newCards).toEqual(['H', 'C', 'Mg']);
 });
+
+it('도감에 이미 있는 원소·분자도 새 판에서는 모든 단계를 다시 한다', () => {
+  finishTutorial();
+  playOrder('o1');
+  S().restartRun();
+  S().next();
+  pick('o1');
+  expect(S().queue.map(x => x.target)).toEqual((orders as Order[]).find(o => o.id === 'o1')!.steps.map(x => x.target));
+  expect(S().phase).toBe('room');
+});
