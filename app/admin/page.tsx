@@ -17,6 +17,7 @@ const TABS: Tab[] = [
   { id: 'dialog', label: '대화', files: [{ file: 'dialog-config', label: '대화', help: 'intro는 인트로 대사(한 줄씩 넘어감), hints는 실패 한 줄 안내. 대사는 1~2문장.' }] },
   { id: 'quiz', label: '퀴즈', files: [{ file: 'quiz-pool', label: '퀴즈', help: 'order는 주문 id, answer는 choices 안의 번호(0부터), page·explain은 교과서 근거.' }] },
   { id: 'minigame', label: '미니게임', files: [{ file: 'minigame-config', label: '미니게임', help: '시간은 ms(1000 = 1초). 방마다 수치·좌표를 조정하세요. 한 판 10분 내외가 되도록.' }] },
+  { id: 'audio', label: '소리', files: [{ file: 'audio-config', label: '소리', help: 'bgm.volume·sfx.volume은 0~1(따로 조절), sfx.minGapMs는 같은 효과음 연타 최소 간격(ms), 경로는 /assets/audio/ 아래 파일. 저장 뒤 게임 새로고침.' }] },
 ];
 
 export default function AdminPage() {

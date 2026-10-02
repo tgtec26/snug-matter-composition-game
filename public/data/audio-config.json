@@ -1,0 +1,21 @@
+{
+  "bgm": {
+    "volume": 0.4,
+    "tracks": {
+      "title": "/assets/audio/start_ending.mp3",
+      "room": "/assets/audio/mole_game.mp3",
+      "quiz": "/assets/audio/quiz-background.mp3"
+    }
+  },
+  "sfx": {
+    "volume": 0.7,
+    "minGapMs": 90,
+    "files": {
+      "success": "/assets/audio/success.mp3",
+      "correct": "/assets/audio/correct.mp3",
+      "error": "/assets/audio/error.mp3",
+      "pick": "/assets/audio/pick.mp3",
+      "place": "/assets/audio/place.mp3"
+    }
+  }
+}

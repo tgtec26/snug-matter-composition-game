@@ -1,8 +1,21 @@
-export const DATA_FILES = ['elements', 'molecules', 'ions', 'substances', 'orders', 'minigame-config', 'dialog-config', 'quiz-pool'] as const;
+import type { AudioConfig } from '@/game/audio';
+
+export const DATA_FILES = ['elements', 'molecules', 'ions', 'substances', 'orders', 'minigame-config', 'dialog-config', 'quiz-pool', 'audio-config'] as const;
 export type DataFile = (typeof DATA_FILES)[number];
 const arr = (name: string, v: unknown) => (Array.isArray(v) && v.length ? [] : [`${name}: 비어 있거나 배열이 아님`]);
 const need = (name: string, v: Record<string, unknown>[], keys: string[]) =>
   v.flatMap((o, i) => keys.filter(k => o[k] === undefined).map(k => `${name}[${i}].${k} 없음`));
+
+const vol = (x: unknown) => typeof x === 'number' && x >= 0 && x <= 1;
+function audioErrors(v: AudioConfig): string[] {
+  const errs: string[] = [];
+  if (!vol(v?.bgm?.volume)) errs.push('audio-config.bgm.volume은 0~1');
+  if (!vol(v?.sfx?.volume)) errs.push('audio-config.sfx.volume은 0~1');
+  if (typeof v?.sfx?.minGapMs !== 'number' || v.sfx.minGapMs < 0) errs.push('audio-config.sfx.minGapMs는 0 이상 숫자');
+  for (const k of ['title', 'room', 'quiz']) if (!v?.bgm?.tracks?.[k as 'title']) errs.push(`audio-config.bgm.tracks.${k} 없음`);
+  for (const k of ['success', 'correct', 'error', 'pick', 'place']) if (!v?.sfx?.files?.[k as 'error']) errs.push(`audio-config.sfx.files.${k} 없음`);
+  return errs;
+}
 
 export const VALIDATORS: Record<DataFile, (v: never) => string[]> = {
   elements: (v: Record<string, unknown>[]) => [...arr('elements', v), ...need('elements', v, ['number', 'symbol', 'name', 'group', 'period', 'state'])],
@@ -13,6 +26,7 @@ export const VALIDATORS: Record<DataFile, (v: never) => string[]> = {
   'minigame-config': (v: Record<string, unknown>) => (['atom', 'table', 'molecule', 'ion'].filter(k => !v[k]).map(k => `minigame-config.${k} 없음`)),
   'dialog-config': (v: Record<string, unknown>) => (v.intro && v.hints ? [] : ['dialog-config: intro/hints 없음']),
   'quiz-pool': (v: Record<string, unknown>[]) => [...arr('quiz-pool', v), ...need('quiz-pool', v, ['id', 'order', 'q', 'choices', 'answer'])],
+  'audio-config': (v: AudioConfig) => audioErrors(v),
 };
 
 type Rows = Record<string, unknown>[];
