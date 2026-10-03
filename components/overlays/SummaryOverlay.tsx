@@ -9,6 +9,7 @@ import { useLock } from '@/components/hooks/useLock';
 import { Burst } from '@/components/overlays/Burst';
 import { Art, artBg, artFrame } from '@/components/Art';
 import { characterStem } from '@/game/characters';
+import { PortfolioSubmitter } from '@/components/PortfolioSubmitter';
 
 const fmt = (ms: number) => { const s = Math.max(0, Math.floor(ms / 1000)); return `${Math.floor(s / 60)}분 ${String(s % 60).padStart(2, '0')}초`; };
 
@@ -36,18 +37,28 @@ export function SummaryOverlay() {
     ['이온', dex.ions.length, 7],
   ] as const;
 
+  const makePngBlob = async () => {
+    if (!card.current) throw new Error('결과 카드가 아직 준비되지 않았습니다.');
+    // html-to-image는 border-image 그림을 PNG에 넣지 못한다 → 같은 그림을 data URL로 바꿔 끼운다(보이는 모습은 같음)
+    const frame = await fetch('/assets/ui/panel_paper.webp').then(r => r.blob())
+      .then(b => new Promise<string>(ok => { const f = new FileReader(); f.onload = () => ok(f.result as string); f.readAsDataURL(b); }));
+    card.current.style.borderImageSource = `url(${frame})`;
+    const url = await toPng(card.current, { pixelRatio: 2 });
+    const blob = await fetch(url).then(r => r.blob());
+    URL.revokeObjectURL(url);
+    return blob;
+  };
+
   const save = async () => {
-    if (!card.current || saving) return;
+    if (saving) return;
     setSaving(true); setErr('');
     try {
-      // html-to-image는 border-image 그림을 PNG에 넣지 못한다 → 같은 그림을 data URL로 바꿔 끼운다(보이는 모습은 같음)
-      const frame = await fetch('/assets/ui/panel_paper.webp').then(r => r.blob())
-        .then(b => new Promise<string>(ok => { const f = new FileReader(); f.onload = () => ok(f.result as string); f.readAsDataURL(b); }));
-      card.current.style.borderImageSource = `url(${frame})`;
-      const url = await toPng(card.current, { pixelRatio: 2 });
+      const blob = await makePngBlob();
+      const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = `입자-결과-${s.nickname || '견습 공작사'}.png`;
       document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch { setErr('저장하지 못했어요. 다시 눌러 보세요.'); }
     setSaving(false);
   };
@@ -90,6 +101,13 @@ export function SummaryOverlay() {
           <button type="button" disabled={locked} onClick={s.restartRun} className={`${btn} text-slate-900`} style={artBg('ui/button_sky')}>다시 하기</button>
           <button type="button" disabled={locked} onClick={s.reset} className={`${btn} text-white`} style={artBg('ui/button_navy')}>처음으로</button>
         </div>
+        <PortfolioSubmitter
+          playerName={s.nickname}
+          title="입자 공방 결과"
+          description={`${s.nickname || '학생'}의 입자 공방 결과`}
+          makePngBlob={makePngBlob}
+          summary={`별 ${s.stars}개 · 실수 ${s.mistakes}번`}
+        />
         {err && <div className="mt-2 text-center text-[18px] text-red-300">{err}</div>}
       </div>
     </div>
